@@ -1415,6 +1415,7 @@ void IndicateNewState(){}//UpdateStatusLEDBuffer();}
 
 void MaybeUpdateStatusLED(){
   UpdateStatusLEDBuffer();
+  if(CONTROL_MODE == CONTROL_MODE_OFF) { UpdateStateLED(); return;}
   ShouldUpdateStatusLED=true;    
 }
 
