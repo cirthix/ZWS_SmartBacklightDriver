@@ -16,10 +16,6 @@ float CurrentToBrightnessIntercept ;
 float CurrentToBrightnessSlope  ;
 float CurrentToVoltageIntercept  ;
 float CurrentToVoltageSlope  ;
-float BrightnessToCurrentIntercept  ;
-float BrightnessToCurrentSlope  ;
-float VoltageToCurrentIntercept  ;
-float VoltageToCurrentSlope ;
 };
 
 
@@ -35,13 +31,9 @@ true,
 4,
 3,
 39.929,
-1.67669,
+1.6,  // If this is over 1.6, it breaks the system.  wtf???
 32190,
-26.6,
--23.2896,
-0.59688,
--1206.8926 ,
-0.03751133
+26.6
 };
 
 
@@ -56,11 +48,7 @@ true,
 39.929,
 0.838345,
 32190,
-13.3,
--46.5792,
-1.19376,
--2413.7852,
-0.07502266
+13.3
 };
 
 const ConfigLED ConfigLED_LED_IS_M270HHF = {
@@ -74,12 +62,10 @@ false,
 39.929,
 1.67669,
 32190,
-26.6,
--23.2896,
-0.59688,
--1206.8926 ,
-0.03751133
+26.6
 };
+
+
 
 #if LED_VERSION==LED_IS_M280DGJ
   #define TargetConfigLED ConfigLED_LED_IS_M280DGJ

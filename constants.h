@@ -1,3 +1,4 @@
+
 #ifndef CONSTANTS_h
 #define CONSTANTS_h
 
@@ -16,7 +17,7 @@
 const uint8_t PWM_MAX=255;
 const uint8_t ADIM_MAX=127;
 const uint32_t SERIAL_BAUD = 9600;
-const uint32_t SLAVESERIALSPEED = 115200;
+const uint32_t SLAVESERIALSPEED = 38400;
 const uint32_t OVERCLOCKED_SPEED = 8000000 ;
 
 #define OVERCLOCKING DISABLED
@@ -51,6 +52,7 @@ const uint32_t OVERCLOCKED_SPEED = 8000000 ;
 
 #define BOARD_IS_ZWS_SMART_BLDRIVER_REV1  1
 #define BOARD_IS_ZWS_SMART_BLDRIVER_REV1_SCAN_HACK 2
+#define BOARD_IS_ZWS_SMART_BLDRIVER_REV1_1  3
 
 #define BUTTONBOARD_IS_ZWS_6PIN_9BUTTON_RG_LED     3
 #define BUTTONBOARD_IS_ZWS_6PIN_8BUTTON_RGB_LED    4
@@ -61,7 +63,7 @@ const uint32_t OVERCLOCKED_SPEED = 8000000 ;
 #define LED_IS_M270HHF    8
 
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
-#define BOARD_VERSION BOARD_IS_ZWS_SMART_BLDRIVER_REV1_SCAN_HACK
+#define BOARD_VERSION BOARD_IS_ZWS_SMART_BLDRIVER_REV1_1 
 #define BUTTONBOARD_VERSION BUTTONBOARD_IS_ZWS_6PIN_9BUTTON_RGB_LED
 #define LED_VERSION LED_IS_V390DK
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
@@ -76,11 +78,8 @@ const uint8_t TargetPowerSaveSHUTDOWN = 0; // Shutdown disables the dp recievers
 const uint8_t TargetPowerSaveLOWPOWER = 1; // Lowpower mode disables the fpga, and by extension, the backlight
 const uint8_t TargetPowerSaveFULLY_ON = 2; // System fully operational
 const uint8_t CONTROL_MODE_OFF = 0; // The system is OFF
-const uint8_t CONTROL_MODE_IIC = 1; // The system is under i2c control with InputPulse signal
-const uint8_t CONTROL_MODE_PWM = 2; // The system is operating under InputDim and InputPulse control
-const uint8_t CONTROL_MODE_ZWS = 3; // The system is operating autonomously with the InputPulse as both keepalive and
-const uint8_t CONTROL_MODE_WAIT_ZWS_TURNON = 4; // The system is waiting for more pulses to avoid a spurious turnon
-const uint8_t CONTROL_MODE_WAIT_IIC_PWM = 5; // The system is trying to determine operational mode.  If it recieves an I2C transaction within a time window, it will enter IIC control mode.  Otherwise, PWM will be used.
+const uint8_t CONTROL_MODE_WAIT_ZWS_TURNON = 1; // The system is waiting for more pulses to avoid a spurious turnon
+const uint8_t CONTROL_MODE_ZWS = 2; // The system is operating autonomously with the InputPulse as both keepalive and
 const uint8_t OUTPUT_MODE_STROBE = 0; 
 const uint8_t OUTPUT_MODE_STABLE = 1; 
 const uint8_t OUTPUT_MODE_SCAN = 2; 
@@ -110,16 +109,17 @@ const uint16_t DefaultBrightnessStrobe = 125;   // nits
 const uint16_t DefaultBrightnessScan   = 125;   // nits
 
 
-const uint8_t LED_STATE_INDICATOR_MAX_PWM_VALUE  = 64;  // The LED is too bright for indicating status! 
-const uint8_t LED_STATE_INDICATOR_ERROR     = 0; 
-const uint8_t LED_STATE_INDICATOR_POWERSAVE = 1; 
-const uint8_t LED_STATE_INDICATOR_NO_INPUT  = 2; 
-const uint8_t LED_STATE_INDICATOR_PWM       = 3; 
-const uint8_t LED_STATE_INDICATOR_PWMFREE   = 4; 
-const uint8_t LED_STATE_INDICATOR_STROBING  = 5; 
-const uint8_t LED_STATE_INDICATOR_SCANNING  = 6; 
+const uint8_t LED_STATE_INDICATOR_MAX_PWM_VALUE  = 32;  // The LED is too bright for indicating status! 
+const uint8_t LED_STATE_INDICATOR_ERROR       = 0; 
+const uint8_t LED_STATE_INDICATOR_POWERSAVE   = 1; 
+const uint8_t LED_STATE_INDICATOR_NO_INPUT    = 2; 
+const uint8_t LED_STATE_INDICATOR_PWM         = 3; 
+const uint8_t LED_STATE_INDICATOR_PWMFREE     = 4; 
+const uint8_t LED_STATE_INDICATOR_STROBING    = 5; 
+const uint8_t LED_STATE_INDICATOR_SCANNING    = 6; 
+const uint8_t LED_STATE_INDICATOR_SOFTADJUST  = 7; 
 
-
+const uint8_t POWER_RAMP_RATE = 15; // Units of watts per second. This limits the system to turn on slowly to avoid tripping the short-circuit protection in some power supplies
 
 struct LED_STATE_INDICATOR_COLOR {
 uint8_t r;
@@ -130,13 +130,14 @@ uint8_t b;
 
 
 const LED_STATE_INDICATOR_COLOR LED_STATE_INDICATOR_COLORS[] = {
-    { .r = LED_STATE_INDICATOR_MAX_PWM_VALUE, .g=LED_STATE_INDICATOR_MAX_PWM_VALUE, .b=LED_STATE_INDICATOR_MAX_PWM_VALUE },  // WHITE  // LED_STATE_INDICATOR_ERROR     = 0
-    { .r =                0                 , .g=LED_STATE_INDICATOR_MAX_PWM_VALUE, .b=               0                  },  // GREEN  // LED_STATE_INDICATOR_POWERSAVE = 1
-    { .r = LED_STATE_INDICATOR_MAX_PWM_VALUE, .g=               0                 , .b=               0                  },  // RED    // LED_STATE_INDICATOR_NO_INPUT  = 2
-    { .r = LED_STATE_INDICATOR_MAX_PWM_VALUE, .g=LED_STATE_INDICATOR_MAX_PWM_VALUE, .b=               0                  },  // YELLOW // LED_STATE_INDICATOR_PWM       = 3
-    { .r =                0                 , .g=LED_STATE_INDICATOR_MAX_PWM_VALUE, .b=LED_STATE_INDICATOR_MAX_PWM_VALUE },  // CYAN   // LED_STATE_INDICATOR_PWMFREE   = 4
-    { .r =                0                 , .g=               0                 , .b=LED_STATE_INDICATOR_MAX_PWM_VALUE },  // BLUE   // LED_STATE_INDICATOR_STROBING  = 5
-    { .r = LED_STATE_INDICATOR_MAX_PWM_VALUE, .g=               0                 , .b=LED_STATE_INDICATOR_MAX_PWM_VALUE }   // PURPLE // LED_STATE_INDICATOR_SCANNING  = 6
+    { .r = LED_STATE_INDICATOR_MAX_PWM_VALUE, .g=LED_STATE_INDICATOR_MAX_PWM_VALUE, .b=LED_STATE_INDICATOR_MAX_PWM_VALUE },  // WHITE  // LED_STATE_INDICATOR_ERROR      = 0
+    { .r =                0                 , .g=LED_STATE_INDICATOR_MAX_PWM_VALUE, .b=               0                  },  // GREEN  // LED_STATE_INDICATOR_POWERSAVE  = 1
+    { .r = LED_STATE_INDICATOR_MAX_PWM_VALUE, .g=               0                 , .b=               0                  },  // RED    // LED_STATE_INDICATOR_NO_INPUT   = 2
+    { .r = LED_STATE_INDICATOR_MAX_PWM_VALUE, .g=LED_STATE_INDICATOR_MAX_PWM_VALUE, .b=               0                  },  // YELLOW // LED_STATE_INDICATOR_PWM        = 3
+    { .r =                0                 , .g=LED_STATE_INDICATOR_MAX_PWM_VALUE, .b=LED_STATE_INDICATOR_MAX_PWM_VALUE },  // CYAN   // LED_STATE_INDICATOR_PWMFREE    = 4
+    { .r =                0                 , .g=               0                 , .b=LED_STATE_INDICATOR_MAX_PWM_VALUE },  // BLUE   // LED_STATE_INDICATOR_STROBING   = 5
+    { .r = LED_STATE_INDICATOR_MAX_PWM_VALUE, .g=               0                 , .b=LED_STATE_INDICATOR_MAX_PWM_VALUE },  // PURPLE // LED_STATE_INDICATOR_SCANNING   = 6
+    { .r = LED_STATE_INDICATOR_MAX_PWM_VALUE, .g=LED_STATE_INDICATOR_MAX_PWM_VALUE*165/255    , .b= 0}                       // ORANGE // LED_STATE_INDICATOR_SOFTADJUST = 7
 };
 
 
@@ -165,3 +166,4 @@ const uint32_t REAL_SPEED = F_CPU;
 const float CLOCK_RATIO = 1.0 * REAL_SPEED / F_CPU;
 
 #endif
+

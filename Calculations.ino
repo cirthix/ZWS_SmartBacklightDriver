@@ -107,6 +107,7 @@ uint32_t CalculateDeratedPowerLimit(uint16_t myNumerator, uint16_t myDenominator
     float myEffectiveDutyCycle=myNumerator/myDenominator;
     float myDeratedBoost=1+(((myDenominator/myNumerator)-1)/MyConfigLED.DeratingFactor);
     uint32_t myCalculatedPowerLimit=(MyConfigLED.PowerLimit)/myDeratedBoost;
+    
 // Maybe add safety checks here?
     return myCalculatedPowerLimit;
 }
@@ -115,8 +116,8 @@ uint32_t CalculateDeratedPowerLimit(uint16_t myNumerator, uint16_t myDenominator
 void CalculateCycleTimeLimits(){
   DeterminePartialDutyCycleLimits();
   DetermineDimmingAdjustBrightnessRange();
-  SerialDebug(F("Min brightness : "));  SerialDebug(CALCULATED_MINIMUM_BRIGHTNESS);  SerialDebugln(F(" nits")); 
-  SerialDebug(F("Max brightness : "));  SerialDebug(CALCULATED_MAXIMUM_BRIGHTNESS);  SerialDebugln(F(" nits"));   
+//  SerialDebug(F("Min brightness : "));  SerialDebug(CALCULATED_MINIMUM_BRIGHTNESS);  SerialDebugln(F(" nits")); 
+//  SerialDebug(F("Max brightness : "));  SerialDebug(CALCULATED_MAXIMUM_BRIGHTNESS);  SerialDebugln(F(" nits"));   
 }
 
 void DeterminePartialDutyCycleLimits(){ // Note: this calculation is determined for pwm mode operation.  Instead of using the real divider, use the intended divider.

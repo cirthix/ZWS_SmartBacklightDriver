@@ -11,11 +11,11 @@
 
 
 const uint16_t StrobePulseDurationMAX = OutputPulseDurationMAX; // units=microseconds
-const uint16_t SafetyMarginPostPinInterrupt = 20; // Number of microseconds between the pin interrupt and the first allowed timer interrupt after it
-const uint16_t SafetyMarginPostTimerInterrupt = 30; // Number of microseconds between the timer interrupt and the first allowed timer interrupt after it
+const uint16_t SafetyMarginPostPinInterrupt = 40; // Number of microseconds between the pin interrupt and the first allowed timer interrupt after it
+const uint16_t SafetyMarginPostTimerInterrupt = 40; // Number of microseconds between the timer interrupt and the first allowed timer interrupt after it
 const uint16_t SafetyMarginPrePulse         = 10; // Number of microseconds between blanking start and strobe start
 const uint16_t SafetyMarginPostPulse        = 80; // Number of microseconds between strobe pulse falling and expected start of next frame
-const uint16_t StrobeBlankingMinimum        = SafetyMarginPrePulse + SafetyMarginPostPulse + MINIMUM_ONTIME; // units=microcseconds.  Dont' enable strobe mode unless an extended vblank signal is present.
+const uint16_t StrobeBlankingMinimum        = 500+SafetyMarginPrePulse + SafetyMarginPostPulse + MINIMUM_ONTIME; // units=microcseconds.  Dont' enable strobe mode unless an extended vblank signal is present.
 
 void PrintConfigStrobe(){
       SerialDebugln(F("STROBE"));
@@ -32,7 +32,9 @@ void PrintConfigStrobe(){
 
 void EnterStrobing(){
     StopSyncInterrupt();
-    WriteAllPWMs(LOW);
+    POWER_LIMIT=INITIAL_POWER_LIMIT;
+    adimWrite(CALCULATED_ADIM_OFF);
+    WriteAllPWMsLOW();
     wdt_reset();
     adimWrite(CALCULATED_ADIM_STROBE);
     OUTPUT_MODE = OUTPUT_MODE_STROBE;
@@ -257,6 +259,8 @@ void CalculateParametersStrobe() {
 //        SerialDebugln(F("NOTE: above maximum output power, adjusting to stay within specification."));
       ModeConformsToRules = false;
     }
+    
+    if ( CalculatePower(myStrobeADIM, myStrobePulseDuration, myStrobeCycleTime) > POWER_LIMIT) { ModeConformsToRules = false; }
 //    SerialDebugln(F("Strobe mode calculations:"));
 //    SerialDebug(F("Delay    : ")); SerialDebug(myStrobePulseDelay); SerialDebugln(F(" us")); 
 //    SerialDebug(F("Duration : ")); SerialDebug(myStrobePulseDuration); SerialDebugln(F(" us")); 

@@ -45,7 +45,9 @@ void PrintConfigScan(){
 
 void EnterScanning(){
     StopSyncInterrupt();
-    WriteAllPWMs(LOW);
+    POWER_LIMIT=INITIAL_POWER_LIMIT;
+    adimWrite(CALCULATED_ADIM_OFF);
+    WriteAllPWMsLOW();
     wdt_reset();
     adimWrite(CALCULATED_ADIM_SCAN);
     OUTPUT_MODE = OUTPUT_MODE_SCAN;
@@ -85,7 +87,7 @@ void ConfigureTimersScanning(){
 
 
 ISR(TIMER1_COMPA_vect) {
-  // TODO: Fix this to actually be compatible with the 6ch board.  Check the MyConfigLED.NumberStrings value to determine
+  // TODO: Fix this to compatible with the 6ch board.  Check the MyConfigLED.NumberStrings value to determine instead of assuming four strings
   switch(ScanningState){
     #ifdef BLDRIVER_PWM_2
       case SEGMENT_2_ON:  digitalWrite2(BLDRIVER_PWM_2, HIGH);  ScanningState=SEGMENT_2_OFF; OCR1A=GetScanTime3();   break;
@@ -97,7 +99,8 @@ ISR(TIMER1_COMPA_vect) {
     #endif
     #ifdef BLDRIVER_PWM_4
       case SEGMENT_4_ON:  digitalWrite2(BLDRIVER_PWM_4, HIGH);  ScanningState=SEGMENT_4_OFF; OCR1A=GetScanTime7();   break;
-      case SEGMENT_4_OFF: digitalWrite2(BLDRIVER_PWM_4, LOW );  ScanningState=SEGMENT_5_ON;  OCR1A=GetScanTime8();   break;
+      case SEGMENT_4_OFF: digitalWrite2(BLDRIVER_PWM_4, LOW );  ScanningState=SEGMENT_1_ON;  OCR1A=GetScanTime0();   break;
+   // case SEGMENT_4_OFF: digitalWrite2(BLDRIVER_PWM_4, LOW );  ScanningState=SEGMENT_5_ON;  OCR1A=GetScanTime8();   break;
     #endif
     #ifdef BLDRIVER_PWM_5
       case SEGMENT_5_ON:  digitalWrite2(BLDRIVER_PWM_5, HIGH);  ScanningState=SEGMENT_5_OFF; OCR1A=GetScanTime9();   break;
@@ -135,7 +138,7 @@ ISR(TIMER1_COMPA_vect) {
 boolean CheckCapableScanning(){
   if( FRAME_TIMINGS_LOCKED != true ) {return false;}     
   if( MyConfigLED.SupportsScanning != true ) {return false;}
-  if( LOCKED_ACTIVE  < (SafetyMarginScanPrePulse + SafetyMarginScanPostPulse + MINIMUM_ONTIME) * MyConfigLED.NumberStrings ) {return false;}
+  if( LOCKED_ACTIVE  < (SafetyMarginScanPrePulse + SafetyMarginScanPostPulse + MINIMUM_ONTIME_SCAN) * MyConfigLED.NumberStrings ) {return false;}
   return true;  
 }
 
@@ -202,10 +205,10 @@ void CalculateParametersScan() {
 
      
   // Apply ontime/offtime limitations.  Correct the values but don't cause another loop iteration, the situation will only get worse.
-    if ( myScanPulseDuration < MINIMUM_ONTIME) {
+    if ( myScanPulseDuration < MINIMUM_ONTIME_SCAN) {
 //        SerialDebugln(F("NOTE: below minimum pulse duration, adjusting to stay within specification."));
 //      ModeConformsToRules = false;
-      myScanPulseDuration = MINIMUM_ONTIME;
+      myScanPulseDuration = MINIMUM_ONTIME_SCAN;
     }
     if ( myScanPulseDuration > CalculateMaxDurationScan()) {
 //        SerialDebugln(F("NOTE: above maximum pulse duration, adjusting to stay within specification."));
@@ -218,6 +221,9 @@ void CalculateParametersScan() {
 //        SerialDebugln(F("NOTE: above maximum output power, adjusting to stay within specification."));
       ModeConformsToRules = false;
     }
+
+    if ( CalculatePower(myScanADIM, myScanPulseDuration, CalculateSegmentDurationScan()) > POWER_LIMIT) { ModeConformsToRules = false; }
+    
 //    SerialDebugln(F("Scan mode calculations:"));
 //    SerialDebug(F("Delay    : ")); SerialDebug(myScanPulseDelay); SerialDebugln(F(" us")); 
 //    SerialDebug(F("Duration : ")); SerialDebug(myScanPulseDuration); SerialDebugln(F(" us")); 

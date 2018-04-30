@@ -93,19 +93,38 @@ private:
  uint8_t filter_is_dirty;
 
  
+ 
 // These values are for a system with a 10kohm pullup and pulldowns in series with buttons, having values of 0, 10k, 4.7k, and 1k.
+//const uint16_t abserror          = 15;
+//const float relerror             = 0.10;
+//const uint16_t cutoff_zero       = 0;
+//const uint16_t cutoff_zero_low   = cutoff_zero;
+//const uint16_t cutoff_zero_high  = cutoff_zero+(abserror+cutoff_zero*relerror);
+//const uint16_t cutoff_one        = 93;
+//const uint16_t cutoff_one_low    = cutoff_one-(abserror+cutoff_one*relerror);
+//const uint16_t cutoff_one_high   = cutoff_one+(abserror+cutoff_one*relerror);
+//const uint16_t cutoff_two        = 530;
+//const uint16_t cutoff_two_low    = cutoff_two-(abserror+cutoff_two*relerror);
+//const uint16_t cutoff_two_high   = cutoff_two+(abserror+cutoff_two*relerror);
+//const uint16_t cutoff_three      = 930;
+//const uint16_t cutoff_three_low  = cutoff_three-(abserror+cutoff_three*relerror);
+//const uint16_t cutoff_three_high = cutoff_three+(abserror+cutoff_three*relerror);
+
+
+ 
+// These values are for a system with a 1kohm pullup and pulldowns in series with buttons, having values of 0, 4.02k, 2k, and 1k.
 const uint16_t abserror          = 15;
 const float relerror             = 0.10;
 const uint16_t cutoff_zero       = 0;
 const uint16_t cutoff_zero_low   = cutoff_zero;
 const uint16_t cutoff_zero_high  = cutoff_zero+(abserror+cutoff_zero*relerror);
-const uint16_t cutoff_one        = 93;
+const uint16_t cutoff_one        = 512;
 const uint16_t cutoff_one_low    = cutoff_one-(abserror+cutoff_one*relerror);
 const uint16_t cutoff_one_high   = cutoff_one+(abserror+cutoff_one*relerror);
-const uint16_t cutoff_two        = 327;
+const uint16_t cutoff_two        = 682;
 const uint16_t cutoff_two_low    = cutoff_two-(abserror+cutoff_two*relerror);
 const uint16_t cutoff_two_high   = cutoff_two+(abserror+cutoff_two*relerror);
-const uint16_t cutoff_three      = 511;
+const uint16_t cutoff_three      = 819;
 const uint16_t cutoff_three_low  = cutoff_three-(abserror+cutoff_three*relerror);
 const uint16_t cutoff_three_high = cutoff_three+(abserror+cutoff_three*relerror);
 

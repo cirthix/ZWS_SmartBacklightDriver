@@ -85,7 +85,9 @@ void CalculateParametersStable() {
 
 void EnterStable(){
     StopSyncInterrupt();
-    WriteAllPWMs(LOW);
+    POWER_LIMIT=INITIAL_POWER_LIMIT;
+    adimWrite(CALCULATED_ADIM_OFF);
+    WriteAllPWMsLOW();
     wdt_reset();
     adimWrite(CALCULATED_ADIM_STABLE);
     OUTPUT_MODE = OUTPUT_MODE_STABLE;
@@ -98,7 +100,7 @@ void EnterStable(){
 
 void ConfigureTimersPWM(){  
     SerialDebugln(F("Configuring timers for stable mode"));
-WriteAllPWMs(0); 
+WriteAllPWMsLOW(); 
 // To avoid a glitch when disabling the timer clocks, disable the outputs temporarily
 
 // Stop timer interrupts
@@ -138,41 +140,142 @@ SetTimer0ClockDivider(DetermineCorrectTimer0Divider(DetermineTimer0Prescaler(Tar
 SetTimer1ClockDivider(DetermineCorrectTimer1Divider(DetermineTimer0Prescaler(TargetTimerDividerStable))); // Also note: TargetTimerDividerStable refers to the divider of timer0 prescaler, which is then used for all timers.
 SetTimer2ClockDivider(DetermineCorrectTimer2Divider(DetermineTimer0Prescaler(TargetTimerDividerStable)));
 
+
+
 // I'm not sure why, but there is a bug here, i think withink the hardware, which causes some channels to turn off until the led driver is enable-cycled.  The patch is to always enable-cycle the led driver when entering pwm mode.
 wdt_reset();
 OutputDisable();
+delay(50);
+wdt_reset();
+// Enable the output PWMs
+WriteAllPWMs(CALCULATED_PWM_STABLE); 
 delay(50);
 OutputEnable();
 wdt_reset();
 
 
-// Enable the output
-WriteAllPWMs(CALCULATED_PWM_STABLE); 
 }
 
 
 void WriteAllPWMs(uint8_t TargetValue){
   // TODO: Add code to invert PWM signal and PWM value on every other output to further reduce peak current and audible noise.
   // Note: this function makes use of "analogWriteOkFF", which is a modified version of analogWrite().  The modification is to skip the "else if (val == 255) {digitalWrite(HIGH);}" section.
+
+uint8_t TargetValueB=TargetValue;
+const boolean USE_OPPOSITE_PWM_TIMER_MODE = true;
+if(USE_OPPOSITE_PWM_TIMER_MODE==true){
+  TargetValueB=255-TargetValue;
+  TCCR0A|=(1<<COM0B0);
+  TCCR1A|=(1<<COM1B0);
+  TCCR2A|=(1<<COM2B0);
+}
+
     #ifdef BLDRIVER_PWM
-        analogWriteOkFF(BLDRIVER_PWM, TargetValue);   
+    if((digitalPinToTimer(BLDRIVER_PWM)==TIMER0B)||(digitalPinToTimer(BLDRIVER_PWM)==TIMER1B)||(digitalPinToTimer(BLDRIVER_PWM)==TIMER2B)){
+      if(TargetValueB==0) {
+        digitalWrite(BLDRIVER_PWM, HIGH);
+      } else {   
+        analogWriteOkFF(BLDRIVER_PWM, TargetValueB); 
+      }  
+    } else {
+      analogWriteOkFF(BLDRIVER_PWM, TargetValue);  
+    }
     #endif
     #ifdef BLDRIVER_PWM_1
-        analogWriteOkFF(BLDRIVER_PWM_1, TargetValue);
+    if((digitalPinToTimer(BLDRIVER_PWM_1)==TIMER0B)||(digitalPinToTimer(BLDRIVER_PWM_1)==TIMER1B)||(digitalPinToTimer(BLDRIVER_PWM_1)==TIMER2B)){
+      if(TargetValueB==0) {
+        digitalWrite(BLDRIVER_PWM_1, HIGH);
+      } else {   
+        analogWriteOkFF(BLDRIVER_PWM_1, TargetValueB); 
+      }  
+    } else {
+      analogWriteOkFF(BLDRIVER_PWM_1, TargetValue);  
+    }
     #endif
     #ifdef BLDRIVER_PWM_2
-        analogWriteOkFF(BLDRIVER_PWM_2, TargetValue);  
+    if((digitalPinToTimer(BLDRIVER_PWM_2)==TIMER0B)||(digitalPinToTimer(BLDRIVER_PWM_2)==TIMER1B)||(digitalPinToTimer(BLDRIVER_PWM_2)==TIMER2B)){
+      if(TargetValueB==0) {
+        digitalWrite(BLDRIVER_PWM_2, HIGH);
+      } else {   
+        analogWriteOkFF(BLDRIVER_PWM_2, TargetValueB); 
+      }  
+    } else {
+      analogWriteOkFF(BLDRIVER_PWM_2, TargetValue);  
+    }
     #endif
     #ifdef BLDRIVER_PWM_3
-        analogWriteOkFF(BLDRIVER_PWM_3, TargetValue);   
+    if((digitalPinToTimer(BLDRIVER_PWM_3)==TIMER0B)||(digitalPinToTimer(BLDRIVER_PWM_3)==TIMER1B)||(digitalPinToTimer(BLDRIVER_PWM_3)==TIMER2B)){
+      if(TargetValueB==0) {
+        digitalWrite(BLDRIVER_PWM_3, HIGH);
+      } else {   
+        analogWriteOkFF(BLDRIVER_PWM_3, TargetValueB); 
+      }  
+    } else {
+      analogWriteOkFF(BLDRIVER_PWM_3, TargetValue);  
+    }   
     #endif
     #ifdef BLDRIVER_PWM_4
-        analogWriteOkFF(BLDRIVER_PWM_4, TargetValue);  
+    if((digitalPinToTimer(BLDRIVER_PWM_4)==TIMER0B)||(digitalPinToTimer(BLDRIVER_PWM_4)==TIMER1B)||(digitalPinToTimer(BLDRIVER_PWM_4)==TIMER2B)){
+      if(TargetValueB==0) {
+        digitalWrite(BLDRIVER_PWM_4, HIGH);
+      } else {   
+        analogWriteOkFF(BLDRIVER_PWM_4, TargetValueB); 
+      }  
+    } else {
+      analogWriteOkFF(BLDRIVER_PWM_4, TargetValue);  
+    }  
     #endif
     #ifdef BLDRIVER_PWM_5
-        analogWriteOkFF(BLDRIVER_PWM_5, TargetValue);   
+    if((digitalPinToTimer(BLDRIVER_PWM_5)==TIMER0B)||(digitalPinToTimer(BLDRIVER_PWM_5)==TIMER1B)||(digitalPinToTimer(BLDRIVER_PWM_5)==TIMER2B)){
+      if(TargetValueB==0) {
+        digitalWrite(BLDRIVER_PWM_5, HIGH);
+      } else {   
+        analogWriteOkFF(BLDRIVER_PWM_5, TargetValueB); 
+      }  
+    } else {
+      analogWriteOkFF(BLDRIVER_PWM_5, TargetValue);  
+    }  
     #endif
     #ifdef BLDRIVER_PWM_6
-        analogWriteOkFF(BLDRIVER_PWM_6, TargetValue);   
+    if((digitalPinToTimer(BLDRIVER_PWM_6)==TIMER0B)||(digitalPinToTimer(BLDRIVER_PWM_6)==TIMER1B)||(digitalPinToTimer(BLDRIVER_PWM_6)==TIMER2B)){
+      if(TargetValueB==0) {
+        digitalWrite(BLDRIVER_PWM_6, HIGH);
+      } else {   
+        analogWriteOkFF(BLDRIVER_PWM_6, TargetValueB); 
+      }  
+    } else {
+      analogWriteOkFF(BLDRIVER_PWM_6, TargetValue);  
+    }   
     #endif    
 }
+
+
+
+
+void WriteAllPWMsLOW(){
+  // Note: digitalwrite disconnects from PWM output!
+
+    #ifdef BLDRIVER_PWM
+        digitalWrite(BLDRIVER_PWM, LOW);   
+    #endif
+    #ifdef BLDRIVER_PWM_1
+        digitalWrite(BLDRIVER_PWM_1, LOW);
+    #endif
+    #ifdef BLDRIVER_PWM_2
+        digitalWrite(BLDRIVER_PWM_2, LOW);  
+    #endif
+    #ifdef BLDRIVER_PWM_3
+        digitalWrite(BLDRIVER_PWM_3, LOW);   
+    #endif
+    #ifdef BLDRIVER_PWM_4
+        digitalWrite(BLDRIVER_PWM_4, LOW);  
+    #endif
+    #ifdef BLDRIVER_PWM_5
+        digitalWrite(BLDRIVER_PWM_5, LOW);   
+    #endif
+    #ifdef BLDRIVER_PWM_6
+        digitalWrite(BLDRIVER_PWM_6, LOW);   
+    #endif    
+}
+
+

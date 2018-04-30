@@ -332,9 +332,11 @@ return ((DetermineTimer2TickRate(myDivider))/256);
 
 
 uint16_t current_to_brightness(uint16_t myCurrent){     return MyConfigLED.CurrentToBrightnessIntercept + MyConfigLED.CurrentToBrightnessSlope*myCurrent;}
-uint16_t brightness_to_current(uint16_t myBrightness){  return MyConfigLED.BrightnessToCurrentIntercept+MyConfigLED.BrightnessToCurrentSlope*myBrightness;}
+uint16_t brightness_to_current(uint16_t myBrightness){  return -(MyConfigLED.CurrentToBrightnessIntercept/MyConfigLED.CurrentToBrightnessSlope)+(1/MyConfigLED.CurrentToBrightnessSlope)*myBrightness;}
+//uint16_t brightness_to_current(uint16_t myBrightness){  return MyConfigLED.BrightnessToCurrentIntercept+MyConfigLED.BrightnessToCurrentSlope*myBrightness;}
 uint16_t current_to_voltage(uint16_t myCurrent){     return MyConfigLED.CurrentToVoltageIntercept+MyConfigLED.CurrentToVoltageSlope*myCurrent;}
-uint16_t voltage_to_current(uint16_t myVoltage){  return MyConfigLED.VoltageToCurrentIntercept+MyConfigLED.VoltageToCurrentSlope*myVoltage;}
+uint16_t voltage_to_current(uint16_t myVoltage){  return -(MyConfigLED.CurrentToVoltageIntercept/MyConfigLED.CurrentToVoltageSlope)+(1/MyConfigLED.CurrentToVoltageSlope)*myVoltage;}
+//uint16_t voltage_to_current(uint16_t myVoltage){  return MyConfigLED.VoltageToCurrentIntercept+MyConfigLED.VoltageToCurrentSlope*myVoltage;}
 
 void DisableUnusedPeripherals(){
   // disable ADC

@@ -1,6 +1,6 @@
 /*
  * THIS CODE WILL FAIL TO COMPILE IN AN UNMODIFIED ARDUINO ENVIRONMENT! 
- * License for use is granted for use with ZisWorks hardwware only.
+ * License for use is granted for use with ZisWorks hardware only.
  * TO AVOID DAMAGING YOUR BOARD AND/OR PANEL, CORRECTLY SET THE VALUES UNDER " CHANGE SYSTEM CONFIGURATION PARAMETERS HERE " IN "CONSTANTS.H"
  * This code is intended for use with the ZisWorks "smart backlight driver" board. 
  * It implements pwm, pwm-free, strobing, and scanning backlight modes.
@@ -53,6 +53,7 @@ Overclock my_Overclock_object = Overclock(OVERCLOCKED_SPEED, SERIAL_BAUD);
 #define LEDCount 1   // Number of LEDs in RGB string
 WS2812 LED(LEDCount); 
 cRGB value;
+cRGB valuePrev;
 #endif
 
 
@@ -64,13 +65,17 @@ InputHandling ButtonBoard;
 // SAFETY LIMIT SETTINGS
 const uint8_t MinimumBrightnessSetpoint = 5 ; // uinits=nits.  Extremely low values can be problematic in some calculations
 const uint8_t MINIMUM_ONTIME = 10; // microseconds
+const uint8_t MINIMUM_ONTIME_SCAN = 30; // microseconds.  Longer due to interrupt trigger timing requirements.
 const uint8_t MINIMUM_OFFTIME = 10; // microseconds
 const uint16_t VOLTAGE_MINIMUM = 30000; // millivolts
 const uint16_t VOLTAGE_MAXIMUM = 60000; // millivolts
 const uint16_t CURRENT_MINIMUM = 50;  // milliamps per channel
 const uint16_t CURRENT_MAXIMUM = 395; // milliamps peak per channel // This should be 395mA, but for the sake of not blowing up more LED strips, use 100mA instead
 const uint16_t CURRENT_MAXIMUM_SUTAINED = 200; // milliamps average per channel  // This should be 200mA, but for the sake of now blowing up more LED strips, set it to 75mA insteaad
-const uint16_t POWER_MAXIMUM_SUTAINED = 30000; // TOTAL OVER ALL CHANNELS
+const uint16_t POWER_MAXIMUM_SUTAINED = 30000; // milliwatts TOTAL OVER ALL CHANNELS
+const uint16_t INITIAL_POWER_LIMIT = 5000; // milliwatts TOTAL OVER ALL CHANNELS
+uint16_t POWER_LIMIT = INITIAL_POWER_LIMIT; // milliwatts TOTAL OVER ALL CHANNELS
+uint16_t OLD_POWER_LIMIT = 0; // milliwatts TOTAL OVER ALL CHANNELS
 uint16_t OutputPulseDurationMAX=2000; // units=microseconds
 
 const uint8_t TimerDividerMinimum = 0x01; // The supported values happen to be in the timer0 and timer1 scaler range 1-5
@@ -187,9 +192,9 @@ const    uint16_t BLANKING_TIME_MAXIMUM          = 40000 * (REAL_SPEED / 1000000
 const    uint16_t BLANKING_TIME_MINIMUM          = 30    * (REAL_SPEED / 1000000) / TIMER1_CLOCK_DIVIDER_EQ;
 const    uint16_t ACTIVE_TIME_MAXIMUM            = 40000 * (REAL_SPEED / 1000000) / TIMER1_CLOCK_DIVIDER_EQ;
 const    uint16_t ACTIVE_TIME_MINIMUM            = 1000  * (REAL_SPEED / 1000000) / TIMER1_CLOCK_DIVIDER_EQ;
-const    uint16_t TIME_REQUIRED_FOR_SOFTSERIAL  = 110; // microseconds.  Allocated time for the softserial transaction.
+const    uint16_t TIME_REQUIRED_FOR_SOFTSERIAL  = 440; // microseconds.  Allocated time for the softserial transaction.
 const    uint16_t TIME_REQUIRED_FOR_RGBLED      = 150; // microseconds.  Allocated time for the softserial transaction.
-const    uint16_t TIME_REQUIRED_FOR_TIMING_SENSITIVE_ACTIVITY = TIME_REQUIRED_FOR_RGBLED; // microseconds.  The longest time needed by any interrupt-sensitive activity.
+const    uint16_t TIME_REQUIRED_FOR_TIMING_SENSITIVE_ACTIVITY = TIME_REQUIRED_FOR_SOFTSERIAL; // microseconds.  The longest time needed by any interrupt-sensitive activity.
 
 
 uint32_t InterruptPreviousMicros=0;
@@ -321,10 +326,10 @@ void setup()
   EnterControlOFF();
 
   PostHysteresisInputPWM = MaximumInputPWM / 2;
-
+  
+  POWER_LIMIT = INITIAL_POWER_LIMIT;
   DetermineMaximumStableCurrent();
   CalculateCycleTimeLimits();
-
 
   PrintConfigLED();
 Serial.flush();
@@ -377,7 +382,8 @@ void TaskFastest() {
 
 void Task1ms() {
   RefilterFrameParameters();
-  SoftAdjustAdim();  // Ramps up output current at no faster than roughly 2.5mA/millisecond (or 5mA if the ApplyParameters or a modechange also updates it)
+  MaybeUpdateStatusLED();
+  SoftAdjustAdim();  
 }
 
 void Task10ms() {
@@ -385,13 +391,13 @@ void Task10ms() {
   ButtonBoard.ReadPhysicalInputs();
   ButtonBoard.RefilterInputState();
   HandleButtonBoardInput();
+  MaybeSendSerialStateToSlaves();
   // SerialDebug(F("RecentPulse : "));  SerialDebugln(RecentInputPulse);
 }
 
 void Task100ms() {
+  SoftAdjustPowerLimit();  // Gently ramps up the power limit to avoid tripping short-circuit protection on the input power supply
   ModeHandling();
-  MaybeSendSerialStateToSlaves();
-  MaybeUpdateStatusLED();
   RecalculateParameters();
 }
 
@@ -434,22 +440,11 @@ void ModeHandlingControl() {
   //  SerialDebug(F("InputEnable : ")); SerialDebugln(InputEnable==HIGH);
   switch (CONTROL_MODE) {
     case CONTROL_MODE_OFF :
-      if (BufferedInputEnable == HIGH) {
-        CONTROL_MODE = CONTROL_MODE_WAIT_IIC_PWM;
-        ExitControlOFF();
+      if (BufferedRecentInputPulse == true) {
+        CONTROL_MODE = CONTROL_MODE_WAIT_ZWS_TURNON;
         EnterIntermediateStateMillis = millisNoInterruptChanges();
-      } else {
-        if (BufferedRecentInputPulse == true) {
-          CONTROL_MODE = CONTROL_MODE_WAIT_ZWS_TURNON;
-          EnterIntermediateStateMillis = millisNoInterruptChanges();
-        }
       }
       break;
-    case CONTROL_MODE_IIC : break; // Do nothing, stay in this mode until power loss;
-    case CONTROL_MODE_PWM : if (BufferedInputEnable == LOW) {
-        CONTROL_MODE = CONTROL_MODE_OFF;
-        break;
-      }
     case CONTROL_MODE_WAIT_ZWS_TURNON :
       if (BufferedRecentInputPulse == false) {
         CONTROL_MODE = CONTROL_MODE_OFF;
@@ -468,12 +463,6 @@ void ModeHandlingControl() {
         SerialDebugln("EXITING STATE "); // Remove this line when satisfied with mode stability
       }
       break;
-    case CONTROL_MODE_WAIT_IIC_PWM : if (SuccessfulIIC == true)  {
-        CONTROL_MODE = CONTROL_MODE_IIC;
-      }  if ((millisNoInterruptChanges() - EnterIntermediateStateMillis) >= ModeTimeout) {
-        CONTROL_MODE = CONTROL_MODE_PWM;
-        break;
-      }
   }
 }
 
@@ -481,47 +470,19 @@ void ModeHandlingOutput() {
   if (OUTPUT_MODE == OUTPUT_MODE_OFF ) {
     switch (CONTROL_MODE) {
       case CONTROL_MODE_OFF : break;
-      case CONTROL_MODE_IIC :
-        if (TargetPowerSave == TargetPowerSaveFULLY_ON) {
-          PowerON();
-          return;
-        }
-        break;
-      case CONTROL_MODE_PWM :
-        PowerON(); return;
-        break;
+      case CONTROL_MODE_WAIT_ZWS_TURNON : break;
       case CONTROL_MODE_ZWS :
         if (TargetPowerSave == TargetPowerSaveFULLY_ON) {
           PowerON();
           return;
         }
         break;
-      case CONTROL_MODE_WAIT_IIC_PWM : break;
-      case CONTROL_MODE_WAIT_ZWS_TURNON : break;
     }
   }
   if (OUTPUT_MODE == OUTPUT_MODE_STABLE ) {
     switch (CONTROL_MODE) {
       case CONTROL_MODE_OFF : PowerOFF(); break;
-      case CONTROL_MODE_IIC :
-        if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
-          PowerOFF();
-          return;
-        }
-        if ((CheckCapableStrobing() == true) && (TargetMode == OUTPUT_MODE_STROBE )) {
-          EnterStrobing();
-        }
-        if ((CheckCapableScanning() == true) && (TargetMode == OUTPUT_MODE_SCAN   )) {
-          EnterScanning();
-        }
-        break;
-      case CONTROL_MODE_PWM :
-        if (CheckCapableStrobing() == true) {
-          EnterStrobing();
-        }
-        // There is no input which can select between strobing and scanning in this mode
-        // Only support strobe mode with the pwm control scheme
-        break;
+      case CONTROL_MODE_WAIT_ZWS_TURNON : PowerOFF();  break;
       case CONTROL_MODE_ZWS :
         if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
           PowerOFF();
@@ -534,32 +495,12 @@ void ModeHandlingOutput() {
           EnterScanning();
         }
         return;
-      case CONTROL_MODE_WAIT_IIC_PWM : PowerOFF();  break;
-      case CONTROL_MODE_WAIT_ZWS_TURNON : PowerOFF();  break;
     }
   }
   if (OUTPUT_MODE == OUTPUT_MODE_STROBE ) {
     switch (CONTROL_MODE) {
       case CONTROL_MODE_OFF : PowerOFF(); break;
-      case CONTROL_MODE_IIC :
-        if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
-          PowerOFF();
-          return;
-        }
-        if ((CheckCapableStrobing() == false) && (TargetMode == OUTPUT_MODE_STROBE )) {
-          EnterStable();
-        }
-        if ((CheckCapableScanning() == true) && (TargetMode == OUTPUT_MODE_SCAN   )) {
-          EnterScanning();
-        }
-        break;
-      case CONTROL_MODE_PWM :
-        if (CheckCapableStrobing() == false) {
-          EnterStable();
-        }
-        // There is no input which can select between strobing and scanning in this mode
-        // Only support strobe mode with the pwm control scheme
-        break;
+      case CONTROL_MODE_WAIT_ZWS_TURNON : PowerOFF();  break;
       case CONTROL_MODE_ZWS :
         if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
           PowerOFF();
@@ -572,30 +513,12 @@ void ModeHandlingOutput() {
           EnterScanning();
         }
         break;
-      case CONTROL_MODE_WAIT_IIC_PWM : PowerOFF(); break;
-      case CONTROL_MODE_WAIT_ZWS_TURNON : PowerOFF();  break;
     }
   }
   if (OUTPUT_MODE == OUTPUT_MODE_SCAN ) {
     switch (CONTROL_MODE) {
       case CONTROL_MODE_OFF : PowerOFF(); break;
-      case CONTROL_MODE_IIC :
-        if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
-          PowerOFF();
-          return;
-        }
-        if ((CheckCapableStrobing() == false) && (TargetMode == OUTPUT_MODE_STROBE )) {
-          EnterStable();
-        }
-        if ((CheckCapableStrobing() == true) && (TargetMode == OUTPUT_MODE_STROBE   )) {
-          EnterStrobing();
-        }
-        break;
-      case CONTROL_MODE_PWM :
-        EnterStable();
-        // There is no input which can select between strobing and scanning in this mode
-        // Only support strobe mode with the pwm control scheme
-        break;
+      case CONTROL_MODE_WAIT_ZWS_TURNON : PowerOFF();  break;
       case CONTROL_MODE_ZWS :
         if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
           PowerOFF();
@@ -608,8 +531,6 @@ void ModeHandlingOutput() {
           EnterStrobing();
         }
         break;
-      case CONTROL_MODE_WAIT_IIC_PWM : PowerOFF(); break;
-      case CONTROL_MODE_WAIT_ZWS_TURNON : PowerOFF();  break;
     }
   }
 }
@@ -925,15 +846,24 @@ void SerialDebugUnblockSlaveCommunication(){
   if((CONTROL_MODE == CONTROL_MODE_OFF) || (CONTROL_MODE == CONTROL_MODE_ZWS)) { SlaveSerialBegin(); }
 }
 
+volatile uint8_t TXvalue;
+uint8_t SkipSameTXCount=0;
+const uint8_t ResendTX = 100; // Reduce same-state retransmits by this ratio
 
 void MaybeSendSerialStateToSlaves(){
 //  if(DebugBlockSlaveSerialCommands==true) { return;} // Note: use SlaveSerialEnd(); and SlaveSerialBegin(); when changing DebugBlockSlaveSerialCommands
-  if(CONTROL_MODE == CONTROL_MODE_OFF) { SendSerialStateToSlaves(); return;}
-  if(CONTROL_MODE == CONTROL_MODE_ZWS) { ShouldSendSerialCommand=true; return; }// Handle this in the interrupt now
+  if((TXvalue==SerialCommandGenerate()) && (SkipSameTXCount >0)) {
+    SkipSameTXCount=SkipSameTXCount-1;  
+  } else {
+    SkipSameTXCount=ResendTX;    
+    if(CONTROL_MODE == CONTROL_MODE_OFF) { SendSerialStateToSlaves(); return;}
+    if(CONTROL_MODE == CONTROL_MODE_ZWS) { ShouldSendSerialCommand=true; return; }// Handle this in the interrupt now
+  }
 }
 
 void SendSerialStateToSlaves() { // Note: sending newlines can increase error rate, it is better to just send one byte
-  SerialToSlave.write(SerialCommandGenerate());
+  TXvalue=SerialCommandGenerate();
+  SerialToSlave.write(TXvalue);
   ShouldSendSerialCommand=false;
 }
 
@@ -963,31 +893,31 @@ void ApplyParameters() {
     case OUTPUT_MODE_STABLE : adimWrite(CALCULATED_ADIM_STABLE); WriteAllPWMs(CALCULATED_PWM_STABLE); break;
     case OUTPUT_MODE_STROBE : AdjustTimerStrobing(); break;
     case OUTPUT_MODE_SCAN   : BuildTimeLine(); break;
-    default    : adimWrite(0); WriteAllPWMs(0); break;
+    default    : adimWrite(0); WriteAllPWMsLOW(); break;
   }  
 }
 
-void SampleInputPWM() {
-  if ( CONTROL_MODE == CONTROL_MODE_PWM) {
-    // This method may be less elegant, but it is self-filtering and tolerant of jitter, interrupts, and noise.
-    const uint16_t SampleDepth = 4096;
-    if ((digitalRead2(INPUT_DIM_OR_SDA_PIN)) == LOW) {
-      SampledLow = SampledLow + 1;
-    } else {
-      SampledHigh = SampledHigh + 1;
-    }
-    if ((SampledHigh == SampleDepth) || (SampledLow == SampleDepth)) {
-      SampledHigh = SampledHigh / 2;
-      SampledLow = SampledLow / 2;
-    }
-    SampledPWM = 1.0 * MaximumInputPWM * SampledHigh / (SampledHigh + SampledLow);
-    //  SerialDebug(F("SampledHigh: ")); SerialDebugln(SampledHigh);
-    //  SerialDebug(F("SampledLow : ")); SerialDebugln(SampledLow);
-    //  SerialDebug(F("SampledPWM : ")); SerialDebugln(SampledPWM);
-    if ( abs(SampledPWM - PostHysteresisInputPWM) > HysteresisInputPWM) {
-      PostHysteresisInputPWM = SampledPWM ;
-    }
-  }
+void SampleInputPWM() { return;
+//  if ( CONTROL_MODE == CONTROL_MODE_PWM) {
+//    // This method may be less elegant, but it is self-filtering and tolerant of jitter, interrupts, and noise.
+//    const uint16_t SampleDepth = 4096;
+//    if ((digitalRead2(INPUT_DIM_OR_SDA_PIN)) == LOW) {
+//      SampledLow = SampledLow + 1;
+//    } else {
+//      SampledHigh = SampledHigh + 1;
+//    }
+//    if ((SampledHigh == SampleDepth) || (SampledLow == SampleDepth)) {
+//      SampledHigh = SampledHigh / 2;
+//      SampledLow = SampledLow / 2;
+//    }
+//    SampledPWM = 1.0 * MaximumInputPWM * SampledHigh / (SampledHigh + SampledLow);
+//    //  SerialDebug(F("SampledHigh: ")); SerialDebugln(SampledHigh);
+//    //  SerialDebug(F("SampledLow : ")); SerialDebugln(SampledLow);
+//    //  SerialDebug(F("SampledPWM : ")); SerialDebugln(SampledPWM);
+//    if ( abs(SampledPWM - PostHysteresisInputPWM) > HysteresisInputPWM) {
+//      PostHysteresisInputPWM = SampledPWM ;
+//    }
+//  }
 }
 
 void UpdateTargetBrightness() {
@@ -1067,14 +997,9 @@ uint16_t CalculateBrightness(uint8_t myADIM, uint16_t myNumerator, uint16_t myDe
 
 void DetermineMaximumStableCurrent() {
   uint8_t myTempADIM = ADIM_MAX;
-  uint32_t myPowerMAX;
+  uint32_t myPowerMAX=POWER_LIMIT;
   uint32_t myPower;
 
-  if ( POWER_MAXIMUM_SUTAINED > MyConfigLED.PowerLimit ) {
-    myPowerMAX = MyConfigLED.PowerLimit ;
-  } else {
-    myPowerMAX = POWER_MAXIMUM_SUTAINED ;
-  }
   //SerialDebug(F("LIMIT IS : ")); SerialDebug(myPowerMAX);  SerialDebugln(F("mW"));
   while ( myTempADIM > 0 ) {
     myPower = CalculatePower(myTempADIM, PWM_MAX);
@@ -1185,10 +1110,8 @@ void PrintControlScheme(){
   SerialDebug(F("CONTROL SCHEME : "));
   switch (CONTROL_MODE) {
     case CONTROL_MODE_OFF :   SerialDebugln(F("OFF")); break;
-    case CONTROL_MODE_PWM :   SerialDebugln(F("PWM")); break;
-    case CONTROL_MODE_IIC :   SerialDebugln(F("IIC")); break;
+    case CONTROL_MODE_WAIT_ZWS_TURNON : SerialDebugln(F("ZWAIT")); break;
     case CONTROL_MODE_ZWS :   SerialDebugln(F("ZWS")); break;
-    case CONTROL_MODE_WAIT_IIC_PWM :  SerialDebugln(F("WAIT")); break;
     default :                 SerialDebugln(F("???"));
   } 
 }
@@ -1225,12 +1148,9 @@ void PrintConfigLED() {
   SerialDebug(F("DeratingFactor : ")); SerialDebugln(MyConfigLED.DeratingFactor);
   SerialDebug(F("CurrentToBrightnessIntercept : ")); SerialDebug(MyConfigLED.CurrentToBrightnessIntercept); SerialDebugln(F(" nits"));
   SerialDebug(F("CurrentToBrightnessSlope : ")); SerialDebug(MyConfigLED.CurrentToBrightnessSlope); SerialDebugln(F(" nits/mA"));
-  SerialDebug(F("BrightnessToCurrentIntercept : ")); SerialDebug(MyConfigLED.BrightnessToCurrentIntercept); SerialDebugln(F(" mA"));
-  SerialDebug(F("BrightnessToCurrentSlope : ")); SerialDebug(MyConfigLED.BrightnessToCurrentSlope); SerialDebugln(F(" mA/nit"));
   SerialDebug(F("CurrentToVoltageIntercept : ")); SerialDebug(MyConfigLED.CurrentToVoltageIntercept); SerialDebugln(F(" v"));
   SerialDebug(F("CurrentToVoltageSlope : ")); SerialDebug(MyConfigLED.CurrentToVoltageSlope); SerialDebugln(F(" v/mA"));
-  SerialDebug(F("VoltageToCurrentIntercept : ")); SerialDebug(MyConfigLED.VoltageToCurrentIntercept); SerialDebugln(F(" mA"));
-  SerialDebug(F("VoltageToCurrentSlope : ")); SerialDebug(MyConfigLED.VoltageToCurrentSlope); SerialDebugln(F(" mA/v"));
+  
   SerialDebugln(F(""));
   SerialDebugln(F(""));
   SerialFlush();
@@ -1285,6 +1205,27 @@ void configure_watchdog_timer() {
   wdt_enable(MY_WATCHDOG_TIMEOUT);
   wdt_reset();
 }
+
+boolean SoftStartupPowerLimitIsInEffect(){  
+  if((POWER_LIMIT <  POWER_MAXIMUM_SUTAINED) && (POWER_LIMIT <  MyConfigLED.PowerLimit) ) { return true; } else {return false;}
+}
+
+// Note that it is assumed in the power ramping function will be called 10x per second
+
+void SoftAdjustPowerLimit(){
+  if(SoftStartupPowerLimitIsInEffect()==false ) { return; } else { POWER_LIMIT = POWER_LIMIT+(POWER_RAMP_RATE*100); }
+  if(POWER_LIMIT >  POWER_MAXIMUM_SUTAINED) { POWER_LIMIT = POWER_MAXIMUM_SUTAINED; }
+  if(POWER_LIMIT >  MyConfigLED.PowerLimit) { POWER_LIMIT = MyConfigLED.PowerLimit; }  
+  if(OLD_POWER_LIMIT!=POWER_LIMIT) {
+    DetermineMaximumStableCurrent();
+    CalculateCycleTimeLimits();
+    RecalculateParameters();
+    ApplyParameters();  
+    OLD_POWER_LIMIT=POWER_LIMIT;
+  }
+}
+
+
 
 
 uint8_t TARGET_ADIM = 0;
@@ -1387,6 +1328,7 @@ void UpdateStatusLEDBuffer(){
       default                 : LED_STATE_INDICATOR = LED_STATE_INDICATOR_ERROR ;      
     }
   }
+  if( (TARGET_ADIM!=OUTPUT_ADIM) || (SoftStartupPowerLimitIsInEffect()==true)) {LED_STATE_INDICATOR = LED_STATE_INDICATOR_SOFTADJUST;}
   #ifdef LED_RGB
   value.r=LED_STATE_INDICATOR_COLORS[LED_STATE_INDICATOR].r;
   value.g=LED_STATE_INDICATOR_COLORS[LED_STATE_INDICATOR].g;
@@ -1413,10 +1355,20 @@ void UpdateStatusLEDBuffer(){
 
 void IndicateNewState(){}//UpdateStatusLEDBuffer();}
 
+
+uint8_t SkipSameLEDCount=0;
+const uint8_t ResendLED = 250; // Reduce same-state retransmits by this ratio
+
 void MaybeUpdateStatusLED(){
   UpdateStatusLEDBuffer();
-  if(CONTROL_MODE == CONTROL_MODE_OFF) { UpdateStateLED(); return;}
-  ShouldUpdateStatusLED=true;    
+  if((value.r==valuePrev.r) && (value.g==valuePrev.g) && (value.b==valuePrev.b) && (SkipSameLEDCount >0)) {
+    SkipSameLEDCount=SkipSameLEDCount-1;  
+  } else {
+    valuePrev=value;
+    SkipSameLEDCount=ResendLED;
+    if(CONTROL_MODE == CONTROL_MODE_OFF) { UpdateStateLED(); return;}
+    ShouldUpdateStatusLED=true;    
+  }     
 }
 
 
@@ -1435,7 +1387,8 @@ void UpdateStateLED(){
      delayMicroseconds(50);
      UCSR0B |= (1<<TXEN0);
      ShouldUpdateStatusLED=false;
-   }     
+   }
    #endif
 }
+
 

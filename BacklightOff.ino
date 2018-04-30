@@ -5,8 +5,9 @@
 // Rely on internal global variables
 
 void EnterOff(){ 
+    POWER_LIMIT=INITIAL_POWER_LIMIT;
     StopSyncInterrupt();
-    WriteAllPWMs(0);
+    WriteAllPWMsLOW();
     adimWrite(CALCULATED_ADIM_OFF);
     ConfigureTimersOFF();        
     OUTPUT_MODE = OUTPUT_MODE_OFF;
@@ -15,7 +16,8 @@ void EnterOff(){
 }
 
 void ConfigureTimersOFF(){  
-  WriteAllPWMs(0); 
+    SerialDebugln(F("Configuring timers for off mode"));
+  WriteAllPWMsLOW(); 
   // To avoid a glitch when disabling the timer clocks, disable the outputs temporarily  
   
   // Stop timer interrupts

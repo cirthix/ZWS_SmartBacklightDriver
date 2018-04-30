@@ -4,6 +4,218 @@
 
 
 
+
+
+
+void ModeHandlingControl() {
+  //SerialDebug(F("InPulse : ")); if(BufferedRecentInputPulse==false) { SerialDebugln(F("false"));} else { SerialDebugln(F("OK"));}
+  // First handle the control mode
+  //  SerialDebug(F("InputEnable : ")); SerialDebugln(InputEnable==HIGH);
+  switch (CONTROL_MODE) {
+    case CONTROL_MODE_OFF :
+      if (BufferedInputEnable == HIGH) {
+        CONTROL_MODE = CONTROL_MODE_WAIT_IIC_PWM;
+        ExitControlOFF();
+        EnterIntermediateStateMillis = millisNoInterruptChanges();
+      } else {
+        if (BufferedRecentInputPulse == true) {
+          CONTROL_MODE = CONTROL_MODE_WAIT_ZWS_TURNON;
+          EnterIntermediateStateMillis = millisNoInterruptChanges();
+        }
+      }
+      break;
+    case CONTROL_MODE_IIC : break; // Do nothing, stay in this mode until power loss;
+    case CONTROL_MODE_PWM : if (BufferedInputEnable == LOW) {
+        CONTROL_MODE = CONTROL_MODE_OFF;
+        break;
+      }
+    case CONTROL_MODE_WAIT_ZWS_TURNON :
+      if (BufferedRecentInputPulse == false) {
+        CONTROL_MODE = CONTROL_MODE_OFF;
+      }
+      else {
+        if ((millisNoInterruptChanges() - EnterIntermediateStateMillis) >= ModeTimeoutZWS) {
+          CONTROL_MODE = CONTROL_MODE_ZWS;
+          EnterControlZWS();
+        }
+      }
+      break;
+    case CONTROL_MODE_ZWS : if (BufferedRecentInputPulse == false) {
+        CONTROL_MODE = CONTROL_MODE_OFF;
+        ExitControlZWS();
+        EnterControlOFF();
+        SerialDebugln("EXITING STATE "); // Remove this line when satisfied with mode stability
+      }
+      break;
+    case CONTROL_MODE_WAIT_IIC_PWM : if (SuccessfulIIC == true)  {
+        CONTROL_MODE = CONTROL_MODE_IIC;
+      }  if ((millisNoInterruptChanges() - EnterIntermediateStateMillis) >= ModeTimeout) {
+        CONTROL_MODE = CONTROL_MODE_PWM;
+        break;
+      }
+  }
+}
+
+void ModeHandlingOutput() {
+  if (OUTPUT_MODE == OUTPUT_MODE_OFF ) {
+    switch (CONTROL_MODE) {
+      case CONTROL_MODE_OFF : break;
+      case CONTROL_MODE_IIC :
+        if (TargetPowerSave == TargetPowerSaveFULLY_ON) {
+          PowerON();
+          return;
+        }
+        break;
+      case CONTROL_MODE_PWM :
+        PowerON(); return;
+        break;
+      case CONTROL_MODE_ZWS :
+        if (TargetPowerSave == TargetPowerSaveFULLY_ON) {
+          PowerON();
+          return;
+        }
+        break;
+      case CONTROL_MODE_WAIT_IIC_PWM : break;
+      case CONTROL_MODE_WAIT_ZWS_TURNON : break;
+    }
+  }
+  if (OUTPUT_MODE == OUTPUT_MODE_STABLE ) {
+    switch (CONTROL_MODE) {
+      case CONTROL_MODE_OFF : PowerOFF(); break;
+      case CONTROL_MODE_IIC :
+        if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
+          PowerOFF();
+          return;
+        }
+        if ((CheckCapableStrobing() == true) && (TargetMode == OUTPUT_MODE_STROBE )) {
+          EnterStrobing();
+        }
+        if ((CheckCapableScanning() == true) && (TargetMode == OUTPUT_MODE_SCAN   )) {
+          EnterScanning();
+        }
+        break;
+      case CONTROL_MODE_PWM :
+        if (CheckCapableStrobing() == true) {
+          EnterStrobing();
+        }
+        // There is no input which can select between strobing and scanning in this mode
+        // Only support strobe mode with the pwm control scheme
+        break;
+      case CONTROL_MODE_ZWS :
+        if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
+          PowerOFF();
+          return;
+        }
+        if (TargetMode == OUTPUT_MODE_STROBE ) {
+          EnterStrobing();
+        }
+        if (TargetMode == OUTPUT_MODE_SCAN   ) {
+          EnterScanning();
+        }
+        return;
+      case CONTROL_MODE_WAIT_IIC_PWM : PowerOFF();  break;
+      case CONTROL_MODE_WAIT_ZWS_TURNON : PowerOFF();  break;
+    }
+  }
+  if (OUTPUT_MODE == OUTPUT_MODE_STROBE ) {
+    switch (CONTROL_MODE) {
+      case CONTROL_MODE_OFF : PowerOFF(); break;
+      case CONTROL_MODE_IIC :
+        if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
+          PowerOFF();
+          return;
+        }
+        if ((CheckCapableStrobing() == false) && (TargetMode == OUTPUT_MODE_STROBE )) {
+          EnterStable();
+        }
+        if ((CheckCapableScanning() == true) && (TargetMode == OUTPUT_MODE_SCAN   )) {
+          EnterScanning();
+        }
+        break;
+      case CONTROL_MODE_PWM :
+        if (CheckCapableStrobing() == false) {
+          EnterStable();
+        }
+        // There is no input which can select between strobing and scanning in this mode
+        // Only support strobe mode with the pwm control scheme
+        break;
+      case CONTROL_MODE_ZWS :
+        if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
+          PowerOFF();
+          return;
+        }
+        if (TargetMode == OUTPUT_MODE_STABLE ) {
+          EnterStable();
+        }
+        if (TargetMode == OUTPUT_MODE_SCAN   ) {
+          EnterScanning();
+        }
+        break;
+      case CONTROL_MODE_WAIT_IIC_PWM : PowerOFF(); break;
+      case CONTROL_MODE_WAIT_ZWS_TURNON : PowerOFF();  break;
+    }
+  }
+  if (OUTPUT_MODE == OUTPUT_MODE_SCAN ) {
+    switch (CONTROL_MODE) {
+      case CONTROL_MODE_OFF : PowerOFF(); break;
+      case CONTROL_MODE_IIC :
+        if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
+          PowerOFF();
+          return;
+        }
+        if ((CheckCapableStrobing() == false) && (TargetMode == OUTPUT_MODE_STROBE )) {
+          EnterStable();
+        }
+        if ((CheckCapableStrobing() == true) && (TargetMode == OUTPUT_MODE_STROBE   )) {
+          EnterStrobing();
+        }
+        break;
+      case CONTROL_MODE_PWM :
+        EnterStable();
+        // There is no input which can select between strobing and scanning in this mode
+        // Only support strobe mode with the pwm control scheme
+        break;
+      case CONTROL_MODE_ZWS :
+        if (TargetPowerSave != TargetPowerSaveFULLY_ON) {
+          PowerOFF();
+          return;
+        }
+        if (TargetMode == OUTPUT_MODE_STABLE ) {
+          EnterStable();
+        }
+        if (TargetMode == OUTPUT_MODE_STROBE ) {
+          EnterStrobing();
+        }
+        break;
+      case CONTROL_MODE_WAIT_IIC_PWM : PowerOFF(); break;
+      case CONTROL_MODE_WAIT_ZWS_TURNON : PowerOFF();  break;
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void DebugUART(){
   uint8_t myUCSR0B = UCSR0B;
   uint8_t myRXCIE0 = myUCSR0B & (1<<RXCIE0);
