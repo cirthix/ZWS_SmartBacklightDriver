@@ -1,6 +1,6 @@
 /*
  * THIS CODE WILL FAIL TO COMPILE IN AN UNMODIFIED ARDUINO ENVIRONMENT! 
- * License for use is granted for use with ZisWorks hardware only.
+ * License for use is granted for use with ZisWorks hardware only.  Use of this code for any other purpose is prohibited.
  * TO AVOID DAMAGING YOUR BOARD AND/OR PANEL, CORRECTLY SET THE VALUES UNDER " CHANGE SYSTEM CONFIGURATION PARAMETERS HERE " IN "CONSTANTS.H"
  * This code is intended for use with the ZisWorks "smart backlight driver" board. 
  * It implements pwm, pwm-free, strobing, and scanning backlight modes.
