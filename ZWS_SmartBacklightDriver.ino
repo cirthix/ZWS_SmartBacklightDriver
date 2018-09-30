@@ -976,7 +976,7 @@ uint32_t CalculatePower(uint8_t myADIM, uint16_t myNumerator, uint16_t myDenomin
   uint16_t myCurrent = ADIM_LEVEL_TO_OUTPUT_CURRENT(myADIM);
   uint16_t myVoltage = current_to_voltage(myCurrent);
   float myDutyCycle = 1.0 * myNumerator / myDenominator;
-  return MyConfigLED.NumberStrings * myDutyCycle * myCurrent * myVoltage / 1000;
+  return MyConfigLED.NumberStrings * myDutyCycle * myCurrent * myVoltage / 1000; // Divided by 1000 because myVoltage is in mA
 }
 
 uint16_t CalculateBrightnessStable() {  return CalculateBrightness(CALCULATED_ADIM_STABLE, CALCULATED_PWM_STABLE);}
@@ -1148,8 +1148,8 @@ void PrintConfigLED() {
   SerialDebug(F("DeratingFactor : ")); SerialDebugln(MyConfigLED.DeratingFactor);
   SerialDebug(F("CurrentToBrightnessIntercept : ")); SerialDebug(MyConfigLED.CurrentToBrightnessIntercept); SerialDebugln(F(" nits"));
   SerialDebug(F("CurrentToBrightnessSlope : ")); SerialDebug(MyConfigLED.CurrentToBrightnessSlope); SerialDebugln(F(" nits/mA"));
-  SerialDebug(F("CurrentToVoltageIntercept : ")); SerialDebug(MyConfigLED.CurrentToVoltageIntercept); SerialDebugln(F(" v"));
-  SerialDebug(F("CurrentToVoltageSlope : ")); SerialDebug(MyConfigLED.CurrentToVoltageSlope); SerialDebugln(F(" v/mA"));
+  SerialDebug(F("CurrentToVoltageIntercept : ")); SerialDebug(MyConfigLED.CurrentToVoltageIntercept); SerialDebugln(F(" mv"));
+  SerialDebug(F("CurrentToVoltageSlope : ")); SerialDebug(MyConfigLED.CurrentToVoltageSlope); SerialDebugln(F(" mv/mA"));
   
   SerialDebugln(F(""));
   SerialDebugln(F(""));

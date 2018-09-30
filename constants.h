@@ -58,14 +58,16 @@ const uint32_t OVERCLOCKED_SPEED = 8000000 ;
 #define BUTTONBOARD_IS_ZWS_6PIN_8BUTTON_RGB_LED    4
 #define BUTTONBOARD_IS_ZWS_7PIN_9BUTTON_RGB_LED    5
 
-#define LED_IS_M280DGJ    6
-#define LED_IS_V390DK     7
-#define LED_IS_M270HHF    8
+// Note: Quantum dot support has just been aded.  It has not been tested much.  Do not use this option yet
+#define LED_IS_M280D_SAMSUNG_QUANTUMDOT 6
+#define LED_IS_M280DGJ    7
+#define LED_IS_V390DK     8
+#define LED_IS_M270HHF    9
 
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
 #define BOARD_VERSION BOARD_IS_ZWS_SMART_BLDRIVER_REV1_1 
 #define BUTTONBOARD_VERSION BUTTONBOARD_IS_ZWS_6PIN_9BUTTON_RGB_LED
-#define LED_VERSION LED_IS_M280DGJ
+#define LED_VERSION LED_IS_M280D_SAMSUNG_QUANTUMDOT
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
 
 #include "SUPPORTED_BOARDS.h"
