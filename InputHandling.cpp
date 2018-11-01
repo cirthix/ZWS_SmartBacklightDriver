@@ -46,6 +46,9 @@ void  InputHandling::ReadPhysicalInputs() {
                   case ASCII_CODE_FOR_OSD_OFF               : InputHandling::SetInputHistory( COMMAND_CODE_FOR_OSD_OFF               );  break;
                   case ASCII_CODE_FOR_POWER_ON              : InputHandling::SetInputHistory( COMMAND_CODE_FOR_POWER_ON              );  break;
                   case ASCII_CODE_FOR_POWER_OFF             : InputHandling::SetInputHistory( COMMAND_CODE_FOR_POWER_OFF             );  break;
+                  case ASCII_CODE_FOR_TOGGLE_STEREO_EYE     : InputHandling::SetInputHistory( COMMAND_CODE_FOR_TOGGLE_STEREO_EYE     );  break;
+                  case ASCII_CODE_FOR_STEREO_ENABLE         : InputHandling::SetInputHistory( COMMAND_CODE_FOR_STEREO_ENABLE         );  break;
+                  case ASCII_CODE_FOR_STEREO_DISABLE        : InputHandling::SetInputHistory( COMMAND_CODE_FOR_STEREO_DISABLE        );  break;
                   case ASCII_CODE_FOR_SIMPLE_DEBUG_COMMAND  : InputHandling::SetInputHistory( COMMAND_CODE_FOR_SIMPLE_DEBUG_COMMAND  );  break;
                 }
                 return;
@@ -100,7 +103,7 @@ adc_key_in = analogRead(BUTTON_C_ANALOG);
  if ((!ButtonStateA) && (!ButtonStateB) && (ButtonStateC&BUTTON_1_MASK))   { input_history[input_index]=COMMAND_CODE_FOR_STROBE_ROTATE; return;}
  if ((!ButtonStateA) && (!ButtonStateB) && (ButtonStateC&BUTTON_2_MASK))   { input_history[input_index]=COMMAND_CODE_FOR_EDID_4; return;}
  if ((!ButtonStateA) && (!ButtonStateB) && (ButtonStateC&BUTTON_3_MASK))   { input_history[input_index]=COMMAND_CODE_FOR_EDID_3; return;}
- if ((!ButtonStateA) && (ButtonStateB&BUTTON_0_MASK)  && (ButtonStateC&BUTTON_0_MASK))   { input_history[input_index]=COMMAND_CODE_FOR_PANEL_OSD; return;}
+ if ((!ButtonStateA) && (ButtonStateB&BUTTON_0_MASK)  && (ButtonStateC&BUTTON_0_MASK))   { input_history[input_index]=COMMAND_CODE_FOR_TOGGLE_STEREO_EYE; return;}
  if ((ButtonStateA&BUTTON_0_MASK) && (ButtonStateB&BUTTON_0_MASK)  && (ButtonStateC&BUTTON_0_MASK))   { input_history[input_index]=ASCII_CODE_FOR_SIMPLE_DEBUG_COMMAND; return;}
  if ((ButtonStateA&BUTTON_0_MASK) && (ButtonStateB&BUTTON_0_MASK)  && (!ButtonStateC))   { input_history[input_index]=COMMAND_CODE_FOR_PWM_FREQ_INCREASE; return;}
  if ((ButtonStateA&BUTTON_0_MASK) && (!ButtonStateB)  && (ButtonStateC&BUTTON_0_MASK))   { input_history[input_index]=COMMAND_CODE_FOR_PWM_FREQ_DECREASE; return;}

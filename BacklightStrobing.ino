@@ -99,6 +99,7 @@ ISR(TIMER1_COMPB_vect) {
       OCR1B=StrobeSerial;
     } else {
       OCR1B=StrobePulseHigh;  
+      InfraredStereoTransmitter.SendInfraredSyncToGlasses_PulsedBacklight();
       DoPeriodicTimingSensitiveActivity();
     }
   }

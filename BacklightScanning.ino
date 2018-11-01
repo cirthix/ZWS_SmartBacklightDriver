@@ -14,7 +14,8 @@
 
 uint16_t ScanPulseDurationMAX=OutputPulseDurationMAX; // units=microseconds
 const uint16_t SafetyMarginScanPrePulse = 120; // Number of microseconds between the start of a frame (pulse input fall) and the first possible timer interrupt.  Time needed to send out serial commands
-const uint16_t SafetyMarginScanPostPulse = 90; // Number of microseconds between strobe pulse falling and expected start of next frame
+const uint16_t SafetyMarginScanPostPulse = 90; // Number of microseconds between last backlight segment strobe pulse falling and expected start of next frame
+
 
 void PrintConfigScan(){
       SerialDebugln(F("SCAN"));
@@ -99,7 +100,7 @@ ISR(TIMER1_COMPA_vect) {
     #endif
     #ifdef BLDRIVER_PWM_4
       case SEGMENT_4_ON:  digitalWrite2(BLDRIVER_PWM_4, HIGH);  ScanningState=SEGMENT_4_OFF; OCR1A=GetScanTime7();   break;
-      case SEGMENT_4_OFF: digitalWrite2(BLDRIVER_PWM_4, LOW );  ScanningState=SEGMENT_1_ON;  OCR1A=GetScanTime0();   break;
+      case SEGMENT_4_OFF: digitalWrite2(BLDRIVER_PWM_4, LOW );  ScanningState=SEGMENT_1_ON;  OCR1A=GetScanTime0();   InfraredStereoTransmitter.SendInfraredSyncToGlasses_PulsedBacklight(); break;
    // case SEGMENT_4_OFF: digitalWrite2(BLDRIVER_PWM_4, LOW );  ScanningState=SEGMENT_5_ON;  OCR1A=GetScanTime8();   break;
     #endif
     #ifdef BLDRIVER_PWM_5

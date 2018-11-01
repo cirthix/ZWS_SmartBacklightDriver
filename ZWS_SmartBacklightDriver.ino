@@ -38,6 +38,7 @@
 #include "arduino2.h"  // include the fast I/O 2 functions.  Info here: http://www.codeproject.com/Articles/732646/Fast-digital-I-O-for-Arduino
 #include "constants.h"
 #include "InputHandling.h"
+#include "InfraredStereo.h"
 #include <WS2812.h>
 
 #if OVERCLOCKING==ENABLED
@@ -61,6 +62,7 @@ SendOnlySoftwareSerial SerialToSlave(INPUT_DIM_OR_SDA_PIN);      // Note: only s
 
 
 InputHandling ButtonBoard;
+InfraredStereo InfraredStereoTransmitter;
 
 // SAFETY LIMIT SETTINGS
 const uint8_t MinimumBrightnessSetpoint = 5 ; // uinits=nits.  Extremely low values can be problematic in some calculations
@@ -220,8 +222,10 @@ ISR(INT0_vect) {
         TIFR1 = (1 << ICF1) | (1 << OCF1A) | (1 << OCF1B) | (1 << TOV1); // Clear timer 1 interrupts for a fresh start
         FrameTimingsBelongToNewFrame=true;
         adimWrite();
-        // DoPeriodicTimingSensitiveActivity(); // This has been moved to the timer interrupt to allow a wider range of arbitrary offsets        
-//        Serial.automaticSerialInterruptTX();
+        // Note that post-interrupt-activity has been moved until after the strobe falls (inside timer interrupt) for timing reasons.
+        // InfraredStereoTransmitter.SendInfraredSyncToGlasses();
+        // DoPeriodicTimingSensitiveActivity();     
+        // Serial.automaticSerialInterruptTX();
       }
       break;
     case OUTPUT_MODE_SCAN :
@@ -251,6 +255,7 @@ ISR(INT0_vect) {
       } else {
         RAW_BLANKING = myDelay;        
         FrameTimingsBelongToNewFrame=true;
+        InfraredStereoTransmitter.SendInfraredSyncToGlasses_ContinuiousBacklight(); 
         DoPeriodicTimingSensitiveActivity();
       }
   }
@@ -419,7 +424,8 @@ void Task10000ms() {
 
 
 uint8_t SafelyReadEnableInput() {
-  return digitalRead(INPUT_ENABLE_OR_SCL_PIN);  // This function used to be significant when both INPUT_ENABLE and DIM inputs were used bidirectionally
+  return LOW;
+  //return digitalRead(INPUT_ENABLE_OR_SCL_PIN);  // This function used to be significant when both INPUT_ENABLE and DIM inputs were used bidirectionally
 }
 
 
@@ -754,6 +760,15 @@ void HandleButtonBoardInput() {
         } else {
           TargetOSD = false;
         }  UserConfiguration_SaveOSD(TargetOSD);
+      }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_TOGGLE_STEREO_EYE) {
+        InfraredStereoTransmitter.SwapEye();
+      }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_STEREO_ENABLE) {
+        InfraredStereoTransmitter.SetDisabled();
+      }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_STEREO_ENABLE) {
+        InfraredStereoTransmitter.SetEnabled();
       }
       if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_FACTORY_PROGRAM) {
         RunFactoryProgramming();

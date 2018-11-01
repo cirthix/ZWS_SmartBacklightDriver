@@ -30,6 +30,9 @@ const uint8_t ASCII_CODE_FOR_OSD_ON                 = 0x3C; // '<' Enables the O
 const uint8_t ASCII_CODE_FOR_OSD_OFF                = 0x3E; // '>' Disables the OSD
 const uint8_t ASCII_CODE_FOR_POWER_ON               = 0x7B; // '{' Powers on the device
 const uint8_t ASCII_CODE_FOR_POWER_OFF              = 0x7D; // '}' Powers off the device
+const uint8_t ASCII_CODE_FOR_TOGGLE_STEREO_EYE      = 0x25; // '%' Toggles stereoscopic view
+const uint8_t ASCII_CODE_FOR_STEREO_ENABLE          = 0x28; // '(' Enables the stereoscopic 3d glasses infrared transmitter
+const uint8_t ASCII_CODE_FOR_STEREO_DISABLE         = 0x29; // ')' Disables the stereoscopic 3d glasses infrared transmitter
 const uint8_t ASCII_CODE_FOR_SIMPLE_DEBUG_COMMAND   = 0x40; // '@' Runs the simple debug command (purpose varies)
 
 
@@ -63,6 +66,9 @@ const uint8_t COMMAND_CODE_FOR_OSD_ON                 = ASCII_CODE_FOR_OSD_ON   
 const uint8_t COMMAND_CODE_FOR_OSD_OFF                = ASCII_CODE_FOR_OSD_OFF                ;
 const uint8_t COMMAND_CODE_FOR_POWER_ON               = ASCII_CODE_FOR_POWER_ON               ;
 const uint8_t COMMAND_CODE_FOR_POWER_OFF              = ASCII_CODE_FOR_POWER_OFF              ;
+const uint8_t COMMAND_CODE_FOR_TOGGLE_STEREO_EYE      = ASCII_CODE_FOR_TOGGLE_STEREO_EYE      ;
+const uint8_t COMMAND_CODE_FOR_STEREO_ENABLE          = ASCII_CODE_FOR_STEREO_ENABLE          ;
+const uint8_t COMMAND_CODE_FOR_STEREO_DISABLE         = ASCII_CODE_FOR_STEREO_DISABLE         ;
 const uint8_t COMMAND_CODE_FOR_SIMPLE_DEBUG_COMMAND   = ASCII_CODE_FOR_SIMPLE_DEBUG_COMMAND   ;
 
 

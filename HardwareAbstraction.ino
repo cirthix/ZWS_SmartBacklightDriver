@@ -134,7 +134,7 @@ void SetStaticPins(){
     pinMode(INPUT_DIM_OR_SDA_PIN , INPUT_PULLUP);
   #endif
   #ifdef INPUT_ENABLE_OR_SCL_PIN
-    pinMode(INPUT_ENABLE_OR_SCL_PIN , INPUT);
+//    pinMode(INPUT_ENABLE_OR_SCL_PIN , INPUT); #disabled for 3d glasses support
   #endif
   #ifdef INPUT_PULSE
     pinMode(INPUT_PULSE  , INPUT);
