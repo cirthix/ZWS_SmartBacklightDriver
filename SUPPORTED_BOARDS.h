@@ -1,6 +1,7 @@
 #ifndef SUPPORTEDBOARDS_H
 #define SUPPORTEDBOARDS_H
 
+// Note: Board version 1.3 is layout change only, same pin usage, no firmware change from 1.1
 #if BOARD_VERSION==BOARD_IS_ZWS_SMART_BLDRIVER_REV1_1
 inline void board_print_name(){ SerialDebugln(F("ZisWorks smart backlight driver V1.1"));}
 #define BUTTONBOARD_BUTTON_A_ANALOG  A0
