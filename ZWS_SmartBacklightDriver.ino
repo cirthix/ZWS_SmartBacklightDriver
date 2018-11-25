@@ -876,8 +876,22 @@ void MaybeSendSerialStateToSlaves(){
   }
 }
 
+volatile uint8_t SendSerialStateToSlavesPhase=0;
 void SendSerialStateToSlaves() { // Note: sending newlines can increase error rate, it is better to just send one byte
+if(SendSerialStateToSlavesPhase == 0){
+  SendSerialStateToSlavesPhase = 1;
   TXvalue=SerialCommandGenerate();
+} else {
+  SendSerialStateToSlavesPhase = 0;  
+  switch (OUTPUT_MODE) {
+    case OUTPUT_MODE_STABLE : if (CALCULATED_PWM_STABLE < PWM_MAX) {TXvalue=ASCII_CODE_FOR_BL_MODE_IS_PWM;}
+                              else {TXvalue=ASCII_CODE_FOR_BL_MODE_IS_NOPWM;}
+                              break; 
+    case OUTPUT_MODE_STROBE : TXvalue=ASCII_CODE_FOR_BL_MODE_IS_STROBE; break;
+    case OUTPUT_MODE_SCAN   : TXvalue=ASCII_CODE_FOR_BL_MODE_IS_SCAN; break;
+    default                 : TXvalue=ASCII_CODE_FOR_BL_MODE_IS_INVALID; break;
+  };  
+}  
   SerialToSlave.write(TXvalue);
   ShouldSendSerialCommand=false;
 }

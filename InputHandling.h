@@ -5,8 +5,11 @@
 #define FILTERDEPTH_INPUT 8
 
 const uint8_t ASCII_CODE_FOR_SPECIAL_COMMANDS       = 0x24; // '$' is the special debug code
-const uint8_t ASCII_CODE_FOR_SLAVE_ON               = 0x11; // Nonprintable character 0x11 is "Device control 1" in the ascii table.
-const uint8_t ASCII_CODE_FOR_SLAVE_OFF              = 0x12; // Nonprintable character 0x12 is "Device control 2" in the ascii table.
+const uint8_t ASCII_CODE_FOR_BL_MODE_IS_PWM         = 0x11; // Nonprintable character 0x11 is "Device control 1" in the ascii table.
+const uint8_t ASCII_CODE_FOR_BL_MODE_IS_NOPWM       = 0x12; // Nonprintable character 0x12 is "Device control 2" in the ascii table.
+const uint8_t ASCII_CODE_FOR_BL_MODE_IS_STROBE      = 0x13; // Nonprintable character 0x13 is "Device control 3" in the ascii table.
+const uint8_t ASCII_CODE_FOR_BL_MODE_IS_SCAN        = 0x14; // Nonprintable character 0x14 is "Device control 4" in the ascii table.
+const uint8_t ASCII_CODE_FOR_BL_MODE_IS_INVALID     = 0x15; // Nonprintable character 0x15 is "NAK" in the ascii table.
 const uint8_t ASCII_CODE_FOR_POWER_BUTTON           = 0x2A; // '*' is the power button
 const uint8_t ASCII_CODE_FOR_BRIGHTNESS_INCREASE    = 0x2B; // '+' increases brightness
 const uint8_t ASCII_CODE_FOR_BRIGHTNESS_DECREASE    = 0x2D; // '-' decreases brightness
@@ -40,8 +43,11 @@ const uint8_t COMMAND_CODE_FOR_UNDEFINED              = 0xFF; // This command do
 const uint8_t COMMAND_CODE_FOR_NOTHING                = 0x00; // This command does nothing
 const uint8_t COMMAND_CODE_FOR_SERIAL                 = 0x01; // This command is used as a placeholder to differentiate between serial commands and button commands
 const uint8_t COMMAND_CODE_FOR_SPECIAL_COMMANDS       = ASCII_CODE_FOR_SPECIAL_COMMANDS       ;
-const uint8_t COMMAND_CODE_FOR_SLAVE_ON               = ASCII_CODE_FOR_SLAVE_ON   ;
-const uint8_t COMMAND_CODE_FOR_SLAVE_OFF              = ASCII_CODE_FOR_SLAVE_OFF  ;
+const uint8_t COMMAND_CODE_FOR_BL_MODE_IS_PWM         = ASCII_CODE_FOR_BL_MODE_IS_PWM         ;
+const uint8_t COMMAND_CODE_FOR_BL_MODE_IS_NOPWM       = ASCII_CODE_FOR_BL_MODE_IS_NOPWM       ;
+const uint8_t COMMAND_CODE_FOR_BL_MODE_IS_STROBE      = ASCII_CODE_FOR_BL_MODE_IS_STROBE      ;
+const uint8_t COMMAND_CODE_FOR_BL_MODE_IS_SCAN        = ASCII_CODE_FOR_BL_MODE_IS_SCAN        ;
+const uint8_t COMMAND_CODE_FOR_BL_MODE_IS_INVALID     = ASCII_CODE_FOR_BL_MODE_IS_INVALID     ;
 const uint8_t COMMAND_CODE_FOR_POWER_BUTTON           = ASCII_CODE_FOR_POWER_BUTTON           ;
 const uint8_t COMMAND_CODE_FOR_BRIGHTNESS_INCREASE    = ASCII_CODE_FOR_BRIGHTNESS_INCREASE    ;
 const uint8_t COMMAND_CODE_FOR_BRIGHTNESS_DECREASE    = ASCII_CODE_FOR_BRIGHTNESS_DECREASE    ;

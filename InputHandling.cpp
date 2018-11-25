@@ -21,8 +21,6 @@ void  InputHandling::ReadPhysicalInputs() {
                   #if(SERIAL_COMMANDS_EXTENDED == ENABLED)
                   case ASCII_CODE_FOR_SPECIAL_COMMANDS      : InputHandling::SetInputHistory( COMMAND_CODE_FOR_SPECIAL_COMMANDS      );  break;
                   #endif
-                  case ASCII_CODE_FOR_SLAVE_ON              : InputHandling::SetInputHistory( COMMAND_CODE_FOR_SLAVE_ON              );  break;
-                  case ASCII_CODE_FOR_SLAVE_OFF             : InputHandling::SetInputHistory( COMMAND_CODE_FOR_SLAVE_OFF             );  break;
                   case ASCII_CODE_FOR_POWER_BUTTON          : InputHandling::SetInputHistory( COMMAND_CODE_FOR_POWER_BUTTON          );  break;
                   case ASCII_CODE_FOR_BRIGHTNESS_INCREASE   : InputHandling::SetInputHistory( COMMAND_CODE_FOR_BRIGHTNESS_INCREASE   );  break;
                   case ASCII_CODE_FOR_BRIGHTNESS_DECREASE   : InputHandling::SetInputHistory( COMMAND_CODE_FOR_BRIGHTNESS_DECREASE   );  break;
