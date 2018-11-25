@@ -7,54 +7,9 @@ InputHandling::ResetInputHistory();
 void  InputHandling::ReadPhysicalInputs() {     
   if (input_index < FILTERDEPTH_INPUT-1) {    input_index ++;  } 
   else {    input_index=0;  }
-  
   input_history[input_index] = COMMAND_CODE_FOR_NOTHING;
-  
-  #if(SERIAL_COMMANDS_SIMPLE == ENABLED)
-  // If the serial port has button input, use that and ignore the real button board.  Also, virtual buttons bypass filtering.
-                int incomingByte = Serial.read();      
-                   if (incomingByte > 0) {
-  //              SerialDebug("Got byte: ");                SerialDebug(incomingByte&0xff, HEX);      
-                uint8_t myChar = incomingByte & 0xff ;
-                if(myChar>0x7f) { InputHandling::SetInputHistory( myChar ); return;} // All bytes with values above 127 are considered serial commands.  Let the software handle it.
-                switch (myChar) {
-                  #if(SERIAL_COMMANDS_EXTENDED == ENABLED)
-                  case ASCII_CODE_FOR_SPECIAL_COMMANDS      : InputHandling::SetInputHistory( COMMAND_CODE_FOR_SPECIAL_COMMANDS      );  break;
-                  #endif
-                  case ASCII_CODE_FOR_POWER_BUTTON          : InputHandling::SetInputHistory( COMMAND_CODE_FOR_POWER_BUTTON          );  break;
-                  case ASCII_CODE_FOR_BRIGHTNESS_INCREASE   : InputHandling::SetInputHistory( COMMAND_CODE_FOR_BRIGHTNESS_INCREASE   );  break;
-                  case ASCII_CODE_FOR_BRIGHTNESS_DECREASE   : InputHandling::SetInputHistory( COMMAND_CODE_FOR_BRIGHTNESS_DECREASE   );  break;
-                  case ASCII_CODE_FOR_FACTORY_PROGRAM       : InputHandling::SetInputHistory( COMMAND_CODE_FOR_FACTORY_PROGRAM       );  break;
-                  case ASCII_CODE_FOR_PWM_FREQ_DECREASE     : InputHandling::SetInputHistory( COMMAND_CODE_FOR_PWM_FREQ_DECREASE     );  break;
-                  case ASCII_CODE_FOR_PWM_FREQ_INCREASE     : InputHandling::SetInputHistory( COMMAND_CODE_FOR_PWM_FREQ_INCREASE     );  break;
-                  case ASCII_CODE_FOR_EDID_ROTATE           : InputHandling::SetInputHistory( COMMAND_CODE_FOR_EDID_ROTATE           );  break;
-                  case ASCII_CODE_FOR_EDID_0                : InputHandling::SetInputHistory( COMMAND_CODE_FOR_EDID_0                );  break;
-                  case ASCII_CODE_FOR_EDID_1                : InputHandling::SetInputHistory( COMMAND_CODE_FOR_EDID_1                );  break;
-                  case ASCII_CODE_FOR_EDID_2                : InputHandling::SetInputHistory( COMMAND_CODE_FOR_EDID_2                );  break;
-                  case ASCII_CODE_FOR_EDID_3                : InputHandling::SetInputHistory( COMMAND_CODE_FOR_EDID_3                );  break;
-                  case ASCII_CODE_FOR_EDID_4                : InputHandling::SetInputHistory( COMMAND_CODE_FOR_EDID_4                );  break;
-                  case ASCII_CODE_FOR_EDID_5                : InputHandling::SetInputHistory( COMMAND_CODE_FOR_EDID_5                );  break;
-                  case ASCII_CODE_FOR_EDID_6                : InputHandling::SetInputHistory( COMMAND_CODE_FOR_EDID_6                );  break;
-                  case ASCII_CODE_FOR_EDID_7                : InputHandling::SetInputHistory( COMMAND_CODE_FOR_EDID_7                );  break;
-                  case ASCII_CODE_FOR_STROBE_ROTATE         : InputHandling::SetInputHistory( COMMAND_CODE_FOR_STROBE_ROTATE         );  break;
-                  case ASCII_CODE_FOR_PANEL_OSD             : InputHandling::SetInputHistory( COMMAND_CODE_FOR_PANEL_OSD             );  break;
-                  case ASCII_CODE_FOR_OCTESTMODE_ON         : InputHandling::SetInputHistory( COMMAND_CODE_FOR_OCTESTMODE_ON         );  break;
-                  case ASCII_CODE_FOR_OCTESTMODE_OFF        : InputHandling::SetInputHistory( COMMAND_CODE_FOR_OCTESTMODE_OFF        );  break;
-                  case ASCII_CODE_FOR_OSD_ON                : InputHandling::SetInputHistory( COMMAND_CODE_FOR_OSD_ON                );  break;
-                  case ASCII_CODE_FOR_OSD_OFF               : InputHandling::SetInputHistory( COMMAND_CODE_FOR_OSD_OFF               );  break;
-                  case ASCII_CODE_FOR_POWER_ON              : InputHandling::SetInputHistory( COMMAND_CODE_FOR_POWER_ON              );  break;
-                  case ASCII_CODE_FOR_POWER_OFF             : InputHandling::SetInputHistory( COMMAND_CODE_FOR_POWER_OFF             );  break;
-                  case ASCII_CODE_FOR_TOGGLE_STEREO_EYE     : InputHandling::SetInputHistory( COMMAND_CODE_FOR_TOGGLE_STEREO_EYE     );  break;
-                  case ASCII_CODE_FOR_STEREO_ENABLE         : InputHandling::SetInputHistory( COMMAND_CODE_FOR_STEREO_ENABLE         );  break;
-                  case ASCII_CODE_FOR_STEREO_DISABLE        : InputHandling::SetInputHistory( COMMAND_CODE_FOR_STEREO_DISABLE        );  break;
-                  case ASCII_CODE_FOR_SIMPLE_DEBUG_COMMAND  : InputHandling::SetInputHistory( COMMAND_CODE_FOR_SIMPLE_DEBUG_COMMAND  );  break;
-                }
-                return;
-        }
-#endif
-
-filter_is_dirty=1;
- uint16_t adc_key_in; 
+  filter_is_dirty=1;
+  uint16_t adc_key_in; 
 
 uint8_t ButtonStateA=0x00;
 #ifdef BUTTON_A_ANALOG  
@@ -117,7 +72,6 @@ void  InputHandling::ResetInputHistory() {
 
 void  InputHandling::SetInputHistory(uint8_t state) {
   current_filtered_input = state;
-  previous_filtered_input = COMMAND_CODE_FOR_SERIAL;
   for (uint8_t i = 0; i < FILTERDEPTH_INPUT; i++) {
     input_history[i] = state;
   }

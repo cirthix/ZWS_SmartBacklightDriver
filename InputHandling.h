@@ -41,7 +41,6 @@ const uint8_t ASCII_CODE_FOR_SIMPLE_DEBUG_COMMAND   = 0x40; // '@' Runs the simp
 
 const uint8_t COMMAND_CODE_FOR_UNDEFINED              = 0xFF; // This command does nothing
 const uint8_t COMMAND_CODE_FOR_NOTHING                = 0x00; // This command does nothing
-const uint8_t COMMAND_CODE_FOR_SERIAL                 = 0x01; // This command is used as a placeholder to differentiate between serial commands and button commands
 const uint8_t COMMAND_CODE_FOR_SPECIAL_COMMANDS       = ASCII_CODE_FOR_SPECIAL_COMMANDS       ;
 const uint8_t COMMAND_CODE_FOR_BL_MODE_IS_PWM         = ASCII_CODE_FOR_BL_MODE_IS_PWM         ;
 const uint8_t COMMAND_CODE_FOR_BL_MODE_IS_NOPWM       = ASCII_CODE_FOR_BL_MODE_IS_NOPWM       ;
