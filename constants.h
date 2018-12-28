@@ -26,10 +26,13 @@ const uint32_t OVERCLOCKED_SPEED = 8000000 ;
 #define SERIAL_COMMANDS_SIMPLE ENABLED // ENABLE THIS TO ALLOW VIRTUAL BUTTON PRESSES VIA SERIAL PORT (THIS FEATURE IS USEFUL FOR DEBUGGING)
 #define SERIAL_COMMANDS_EXTENDED ENABLED // ENABLE THIS TO ALLOW COMPLEX SERIAL COMMANDS 
 
-
+const uint8_t SK6812_RESET_TIME = 150; // UNITS=microseconds
+const uint8_t SK6812_POST_IDLE_TIME = 10; // UNITS=microseconds
+const uint8_t SK6812_WRITE_TIME = 2; // UNITS=microseconds
+const uint8_t SK6812_TOTAL_TIME = SK6812_RESET_TIME+SK6812_POST_IDLE_TIME+SK6812_WRITE_TIME; // UNITS=microseconds
 
 // conditional debugging
-#if (SERIAL_DEBUGGING_OUTPUT == ENABLED)
+#if (SERIAL_DEBUGGING_OUTPUT == DISABLED)
 #define SerialDebug(x)      Serial.print(x);   wdt_reset(); Serial.flush();
 #define SerialDebugln(x)    Serial.println(x); wdt_reset(); Serial.flush();
 #define SerialWrite(x)      Serial.write(x);   wdt_reset(); Serial.flush();

@@ -83,15 +83,15 @@ struct ParsedSerialCommand SerialCommandParser(uint8_t myCommand){
 
 void PrintParsedSerialCommand(uint8_t myCommand){
   struct ParsedSerialCommand myParsedSerialCommand=SerialCommandParser(myCommand);
-  Serial.print(F("ZWS : "));  Serial.print(myCommand);   Serial.print(F("\t"));
+  SerialDebug(F("ZWS : "));  SerialDebug(myCommand);   SerialDebug(F("\t"));
   uint8_t ChecksumExtracted = SerialCommandExtractChecksum(myCommand);
   uint8_t ChecsumCalculated = SerialCommandCalculateChecksum(myCommand);  
-  Serial.print(F("BIT :")); Serial.print(SerialCommandExtractFixedBit(myCommand));     Serial.print(F("\t"));
-  Serial.print(F("SUM : ")); Serial.print(ChecksumExtracted); Serial.print(F(" / ")); Serial.print(ChecsumCalculated);     Serial.print(F("\t"));
-  if(myParsedSerialCommand.Valid==true ) {Serial.print(F("VALID"));} else {  Serial.print(F("INVALID"));}     Serial.print(F("\t"));
-  if(myParsedSerialCommand.OSD==true ) {Serial.print(F("OK OSD"));} else {  Serial.print(F("NO OSD"));}     Serial.print(F("\t")); 
-  Serial.print(F("4BITs :")); Serial.print(SerialCommandExtractFourBits(myCommand));     Serial.print(F("\t"));
-  Serial.print(F("EDID :")); Serial.print(myParsedSerialCommand.EDID);     Serial.print(F("\t"));
-  Serial.print(F("PowerSave :")); Serial.print(myParsedSerialCommand.PowerSave);     Serial.println(F(""));  
+  SerialDebug(F("BIT :")); SerialDebug(SerialCommandExtractFixedBit(myCommand));     SerialDebug(F("\t"));
+  SerialDebug(F("SUM : ")); SerialDebug(ChecksumExtracted); SerialDebug(F(" / ")); SerialDebug(ChecsumCalculated);     SerialDebug(F("\t"));
+  if(myParsedSerialCommand.Valid==true ) {SerialDebug(F("VALID"));} else {  SerialDebug(F("INVALID"));}     SerialDebug(F("\t"));
+  if(myParsedSerialCommand.OSD==true ) {SerialDebug(F("OK OSD"));} else {  SerialDebug(F("NO OSD"));}     SerialDebug(F("\t")); 
+  SerialDebug(F("4BITs :")); SerialDebug(SerialCommandExtractFourBits(myCommand));     SerialDebug(F("\t"));
+  SerialDebug(F("EDID :")); SerialDebug(myParsedSerialCommand.EDID);     SerialDebug(F("\t"));
+  SerialDebug(F("PowerSave :")); SerialDebug(myParsedSerialCommand.PowerSave);     SerialDebugln(F(""));  
 }
 

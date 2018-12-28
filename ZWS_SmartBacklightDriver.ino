@@ -1099,7 +1099,7 @@ void PrintParameters() {
     case OUTPUT_MODE_SCAN :   
         PrintConfigScan();
         break;
-    default :                 SerialDebugln(F("???"));
+    default :                 SerialDebugln(F("??"));
   }
 
 //  SerialDebugln(F(""));
@@ -1136,7 +1136,7 @@ void PrintControlScheme(){
     case CONTROL_MODE_OFF :   SerialDebugln(F("OFF")); break;
     case CONTROL_MODE_WAIT_ZWS_TURNON : SerialDebugln(F("ZWAIT")); break;
     case CONTROL_MODE_ZWS :   SerialDebugln(F("ZWS")); break;
-    default :                 SerialDebugln(F("???"));
+    default :                 SerialDebugln(F("????"));
   } 
 }
 
@@ -1405,10 +1405,10 @@ uint8_t IsSerialPortBusy(){
 void UpdateStateLED(){
   #ifdef LED_RGB
     if(IsSerialPortBusy()==0){      
-     UCSR0B = UCSR0B & ~(1<<TXEN0); 
-     delayMicroseconds(50); 
+     UCSR0B = UCSR0B & ~(1<<TXEN0);
+     delayMicroseconds(SK6812_RESET_TIME); 
      LED.sync(); // Sends the data to the LEDs
-     delayMicroseconds(50);
+     delayMicroseconds(SK6812_POST_IDLE_TIME);
      UCSR0B |= (1<<TXEN0);
      ShouldUpdateStatusLED=false;
    }
