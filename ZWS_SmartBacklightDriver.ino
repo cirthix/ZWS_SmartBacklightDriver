@@ -753,6 +753,7 @@ void HandleButtonBoardInput() {
     if ((ButtonBoard.GetPreviousFilteredInput() == COMMAND_CODE_FOR_BRIGHTNESS_INCREASE) && (ButtonBoard.GetCurrentFilteredInput() != COMMAND_CODE_FOR_BRIGHTNESS_INCREASE)) { BrightnessSave(); }
     if ((ButtonBoard.GetPreviousFilteredInput() == COMMAND_CODE_FOR_BRIGHTNESS_DECREASE) && (ButtonBoard.GetCurrentFilteredInput() != COMMAND_CODE_FOR_BRIGHTNESS_DECREASE)) { BrightnessSave(); }
     if ((ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_POWER_BUTTON) ) { SerialDebugBlockSlaveCommunication(); }
+    if ((ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_SIMPLE_DEBUG_COMMAND) ) { EnterScanningTest(); }
     if ((ButtonBoard.GetPreviousFilteredInput() == COMMAND_CODE_FOR_POWER_BUTTON) && ((ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_NOTHING) || (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_UNDEFINED))) {
       RotatePowerState();
       SerialDebugUnblockSlaveCommunication();
@@ -1119,8 +1120,8 @@ void PrintParameters() {
 
 void PrintSomeDebugCrap(){  
   //  SerialDebug(F("BrightnessTarget is "));  SerialDebug(GetTargetBrightness());  SerialDebugln(F("nits"));
-  //  SerialDebug(F("Brightness@MIN is "));  SerialDebug(current_to_brightness(LED_CURRENT_MINIMUM));  SerialDebugln(F("nits"));
-  //  SerialDebug(F("Brightness@MAX is "));  SerialDebug(current_to_brightness(LED_CURRENT_MAXIMUM));  SerialDebugln(F("nits"));
+  //  SerialDebug(F("BrightnessAtMIN is "));  SerialDebug(current_to_brightness(LED_CURRENT_MINIMUM));  SerialDebugln(F("nits"));
+  //  SerialDebug(F("BrightnessAtMAX is "));  SerialDebug(current_to_brightness(LED_CURRENT_MAXIMUM));  SerialDebugln(F("nits"));
   //  SerialDebug(F("ADIM_LEVEL is "));  SerialDebug(CALCULATED_ADIM_STABLE);  SerialDebugln(F(""));
 
   //  SerialDebug(F("RECALCULATED CURRENT is "));  SerialDebug(ADIM_LEVEL_TO_OUTPUT_CURRENT(CALCULATED_ADIM_STABLE));  SerialDebugln(F("mA"));
