@@ -13,7 +13,7 @@
 
 
 uint16_t ScanPulseDurationMAX=OutputPulseDurationMAX; // units=microseconds
-const uint16_t SafetyMarginScanPrePulse = 120; // Number of microseconds between the start of a frame (pulse input fall) and the first possible timer interrupt.  Time needed to send out serial commands
+const uint16_t SafetyMarginScanPrePulse = 50+SK6812_TOTAL_TIME; // Number of microseconds between the start of a frame (pulse input fall) and the first possible timer interrupt.  Time needed to send out serial commands
 const uint16_t SafetyMarginScanPostPulse = 90; // Number of microseconds between last backlight segment strobe pulse falling and expected start of next frame
 
 

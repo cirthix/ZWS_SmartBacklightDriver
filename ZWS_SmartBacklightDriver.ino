@@ -387,6 +387,7 @@ void TaskFastest() {
 
 void Task1ms() {
   RefilterFrameParameters();
+  HandleSerialCommandInput();
   MaybeUpdateStatusLED();
   SoftAdjustAdim();  
 }
@@ -703,14 +704,47 @@ void OutputModeSetSave(uint8_t myMode){
  Serial.println(F("???"));
 }
 
+void HandleSerialCommandInput() {
+  
+  #if(SERIAL_COMMANDS_SIMPLE == ENABLED)
+  // If the serial port has button input, use that and ignore the real button board.  Also, virtual buttons bypass filtering.
+                int incomingByte = Serial.read();      
+                   if (incomingByte > 0) {
+  //              SerialDebug("Got byte: ");                SerialDebug(incomingByte&0xff, HEX);      
+                uint8_t myChar = incomingByte & 0xff ;
+                if(myChar>0x7f) { return; }  // All bytes with values above 127 are considered special zws serial commands which can be ignored in this system
+                switch (myChar) {
+                  #if(SERIAL_COMMANDS_EXTENDED == ENABLED)
+                  case ASCII_CODE_FOR_SPECIAL_COMMANDS      : extended_function();  break;
+                  #endif
+                  case ASCII_CODE_FOR_POWER_BUTTON          : RotatePowerState();  break;
+                  case ASCII_CODE_FOR_BRIGHTNESS_INCREASE   : BrightnessIncrement(); BrightnessSave(); break;
+                  case ASCII_CODE_FOR_BRIGHTNESS_DECREASE   : BrightnessDecrement(); BrightnessSave(); break;
+                  case ASCII_CODE_FOR_FACTORY_PROGRAM       : RunFactoryProgramming(); break;
+                  case ASCII_CODE_FOR_PWM_FREQ_DECREASE     : DecrementFrequencyPWM(); break;
+                  case ASCII_CODE_FOR_PWM_FREQ_INCREASE     : IncrementFrequencyPWM(); break;
+                  case ASCII_CODE_FOR_EDID_0                : TargetEDID = 0; UserConfiguration_SaveEDID(TargetEDID); break;
+                  case ASCII_CODE_FOR_EDID_1                : TargetEDID = 1; UserConfiguration_SaveEDID(TargetEDID); break;
+                  case ASCII_CODE_FOR_EDID_2                : TargetEDID = 2; UserConfiguration_SaveEDID(TargetEDID); break;
+                  case ASCII_CODE_FOR_EDID_3                : TargetEDID = 3; UserConfiguration_SaveEDID(TargetEDID); break;
+                  case ASCII_CODE_FOR_EDID_4                : TargetEDID = 4; UserConfiguration_SaveEDID(TargetEDID); break;
+                  case ASCII_CODE_FOR_EDID_5                : TargetEDID = 5; UserConfiguration_SaveEDID(TargetEDID); break;
+                  case ASCII_CODE_FOR_EDID_6                : TargetEDID = 6; UserConfiguration_SaveEDID(TargetEDID); break;
+                  case ASCII_CODE_FOR_EDID_7                : TargetEDID = 7; UserConfiguration_SaveEDID(TargetEDID); break;
+                  case ASCII_CODE_FOR_STROBE_ROTATE         : OutputModeRotate();  break;
+                  case ASCII_CODE_FOR_TOGGLE_STEREO_EYE     : InfraredStereoTransmitter.SwapEye();  break;
+                  case ASCII_CODE_FOR_STEREO_ENABLE         : InfraredStereoTransmitter.SetEnabled();  break;
+                  case ASCII_CODE_FOR_STEREO_DISABLE        : InfraredStereoTransmitter.SetDisabled();  break;
+                  case ASCII_CODE_FOR_SIMPLE_DEBUG_COMMAND  : EnterScanningTest(); break;
+                }
+                return;
+        }
+#endif
 
-void HandleButtonBoardInput() {
 
-  if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_SIMPLE_DEBUG_COMMAND) { EnterScanningTest(); }
-   
-  if(ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_SPECIAL_COMMANDS                                        ) { extended_function();                                               return; }   
+}
 
-    
+void HandleButtonBoardInput() {    
   if (( CONTROL_MODE == CONTROL_MODE_ZWS) || (CONTROL_MODE == CONTROL_MODE_OFF)) {
     // Commands meant to be repeated when held
     if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_BRIGHTNESS_DECREASE) { BrightnessDecrement(); }
@@ -718,61 +752,23 @@ void HandleButtonBoardInput() {
     // Commands meant to be run when released
     if ((ButtonBoard.GetPreviousFilteredInput() == COMMAND_CODE_FOR_BRIGHTNESS_INCREASE) && (ButtonBoard.GetCurrentFilteredInput() != COMMAND_CODE_FOR_BRIGHTNESS_INCREASE)) { BrightnessSave(); }
     if ((ButtonBoard.GetPreviousFilteredInput() == COMMAND_CODE_FOR_BRIGHTNESS_DECREASE) && (ButtonBoard.GetCurrentFilteredInput() != COMMAND_CODE_FOR_BRIGHTNESS_DECREASE)) { BrightnessSave(); }
-    
     if ((ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_POWER_BUTTON) ) { SerialDebugBlockSlaveCommunication(); }
-        
+    if ((ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_SIMPLE_DEBUG_COMMAND) ) { EnterScanningTest(); }
     if ((ButtonBoard.GetPreviousFilteredInput() == COMMAND_CODE_FOR_POWER_BUTTON) && ((ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_NOTHING) || (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_UNDEFINED))) {
       RotatePowerState();
       SerialDebugUnblockSlaveCommunication();
-    }
+    }    
     // commands meant to be run when pressed
     if ((ButtonBoard.GetPreviousFilteredInput() == COMMAND_CODE_FOR_NOTHING) || (ButtonBoard.GetPreviousFilteredInput() == COMMAND_CODE_FOR_UNDEFINED)) {
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_PWM_FREQ_DECREASE) {
-        IncrementFrequencyPWM();
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_PWM_FREQ_INCREASE) {
-        DecrementFrequencyPWM();
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_0) {
-        TargetEDID = 0;
-        UserConfiguration_SaveEDID(TargetEDID);
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_1) {
-        TargetEDID = 1;
-        UserConfiguration_SaveEDID(TargetEDID);
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_2) {
-        TargetEDID = 2;
-        UserConfiguration_SaveEDID(TargetEDID);
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_3) {
-        TargetEDID = 3;
-        UserConfiguration_SaveEDID(TargetEDID);
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_4) {
-        TargetEDID = 4;
-        UserConfiguration_SaveEDID(TargetEDID);
-      }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_PWM_FREQ_DECREASE) { IncrementFrequencyPWM(); }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_PWM_FREQ_INCREASE) { DecrementFrequencyPWM(); }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_0) { TargetEDID = 0; UserConfiguration_SaveEDID(TargetEDID); }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_1) { TargetEDID = 1; UserConfiguration_SaveEDID(TargetEDID); }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_2) { TargetEDID = 2; UserConfiguration_SaveEDID(TargetEDID); }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_3) { TargetEDID = 3; UserConfiguration_SaveEDID(TargetEDID); }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_4) { TargetEDID = 4; UserConfiguration_SaveEDID(TargetEDID); }
       if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_STROBE_ROTATE) { OutputModeRotate(); } 
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_PANEL_OSD) {
-        if (TargetOSD == false) {
-          TargetOSD = true;
-        } else {
-          TargetOSD = false;
-        }  UserConfiguration_SaveOSD(TargetOSD);
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_TOGGLE_STEREO_EYE) {
-        InfraredStereoTransmitter.SwapEye();
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_STEREO_ENABLE) {
-        InfraredStereoTransmitter.SetDisabled();
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_STEREO_ENABLE) {
-        InfraredStereoTransmitter.SetEnabled();
-      }
-      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_FACTORY_PROGRAM) {
-        RunFactoryProgramming();
-      }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_TOGGLE_STEREO_EYE) { InfraredStereoTransmitter.SwapEye(); }
     }
   }
 }
@@ -1104,7 +1100,7 @@ void PrintParameters() {
     case OUTPUT_MODE_SCAN :   
         PrintConfigScan();
         break;
-    default :                 SerialDebugln(F("???"));
+    default :                 SerialDebugln(F("??"));
   }
 
 //  SerialDebugln(F(""));
@@ -1124,8 +1120,8 @@ void PrintParameters() {
 
 void PrintSomeDebugCrap(){  
   //  SerialDebug(F("BrightnessTarget is "));  SerialDebug(GetTargetBrightness());  SerialDebugln(F("nits"));
-  //  SerialDebug(F("Brightness@MIN is "));  SerialDebug(current_to_brightness(LED_CURRENT_MINIMUM));  SerialDebugln(F("nits"));
-  //  SerialDebug(F("Brightness@MAX is "));  SerialDebug(current_to_brightness(LED_CURRENT_MAXIMUM));  SerialDebugln(F("nits"));
+  //  SerialDebug(F("BrightnessAtMIN is "));  SerialDebug(current_to_brightness(LED_CURRENT_MINIMUM));  SerialDebugln(F("nits"));
+  //  SerialDebug(F("BrightnessAtMAX is "));  SerialDebug(current_to_brightness(LED_CURRENT_MAXIMUM));  SerialDebugln(F("nits"));
   //  SerialDebug(F("ADIM_LEVEL is "));  SerialDebug(CALCULATED_ADIM_STABLE);  SerialDebugln(F(""));
 
   //  SerialDebug(F("RECALCULATED CURRENT is "));  SerialDebug(ADIM_LEVEL_TO_OUTPUT_CURRENT(CALCULATED_ADIM_STABLE));  SerialDebugln(F("mA"));
@@ -1141,7 +1137,7 @@ void PrintControlScheme(){
     case CONTROL_MODE_OFF :   SerialDebugln(F("OFF")); break;
     case CONTROL_MODE_WAIT_ZWS_TURNON : SerialDebugln(F("ZWAIT")); break;
     case CONTROL_MODE_ZWS :   SerialDebugln(F("ZWS")); break;
-    default :                 SerialDebugln(F("???"));
+    default :                 SerialDebugln(F("????"));
   } 
 }
 
@@ -1410,10 +1406,10 @@ uint8_t IsSerialPortBusy(){
 void UpdateStateLED(){
   #ifdef LED_RGB
     if(IsSerialPortBusy()==0){      
-     UCSR0B = UCSR0B & ~(1<<TXEN0); 
-     delayMicroseconds(50); 
+     UCSR0B = UCSR0B & ~(1<<TXEN0);
+     delayMicroseconds(SK6812_RESET_TIME); 
      LED.sync(); // Sends the data to the LEDs
-     delayMicroseconds(50);
+     delayMicroseconds(SK6812_POST_IDLE_TIME);
      UCSR0B |= (1<<TXEN0);
      ShouldUpdateStatusLED=false;
    }

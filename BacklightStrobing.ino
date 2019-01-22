@@ -11,7 +11,7 @@
 
 
 const uint16_t StrobePulseDurationMAX = OutputPulseDurationMAX; // units=microseconds
-const uint16_t SafetyMarginPostPinInterrupt = 40; // Number of microseconds between the pin interrupt and the first allowed timer interrupt after it
+const uint16_t SafetyMarginPostPinInterrupt = 50+SK6812_TOTAL_TIME;; // Number of microseconds between the pin interrupt and the first allowed timer interrupt after it
 const uint16_t SafetyMarginPostTimerInterrupt = 40; // Number of microseconds between the timer interrupt and the first allowed timer interrupt after it
 const uint16_t SafetyMarginPrePulse         = 10; // Number of microseconds between blanking start and strobe start
 const uint16_t SafetyMarginPostPulse        = 80; // Number of microseconds between strobe pulse falling and expected start of next frame
