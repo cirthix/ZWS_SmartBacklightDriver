@@ -32,7 +32,7 @@ const uint8_t SK6812_WRITE_TIME = 2; // UNITS=microseconds
 const uint8_t SK6812_TOTAL_TIME = SK6812_RESET_TIME+SK6812_POST_IDLE_TIME+SK6812_WRITE_TIME; // UNITS=microseconds
 
 // conditional debugging
-#if (SERIAL_DEBUGGING_OUTPUT == DISABLED)
+#if (SERIAL_DEBUGGING_OUTPUT == ENABLED)
 #define SerialDebug(x)      Serial.print(x);   wdt_reset(); Serial.flush();
 #define SerialDebugln(x)    Serial.println(x); wdt_reset(); Serial.flush();
 #define SerialWrite(x)      Serial.write(x);   wdt_reset(); Serial.flush();
