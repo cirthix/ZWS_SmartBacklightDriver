@@ -22,7 +22,6 @@ const uint32_t OVERCLOCKED_SPEED = 8000000 ;
 
 #define OVERCLOCKING DISABLED
 #define SERIAL_INTERFACE ENABLED // If the serial interface is disabled, the D0 and D1 pins can be used for the buttonboard LEDs
-#define SERIAL_DEBUGGING_OUTPUT ENABLED
 #define SERIAL_COMMANDS_SIMPLE ENABLED // ENABLE THIS TO ALLOW VIRTUAL BUTTON PRESSES VIA SERIAL PORT (THIS FEATURE IS USEFUL FOR DEBUGGING)
 #define SERIAL_COMMANDS_EXTENDED ENABLED // ENABLE THIS TO ALLOW COMPLEX SERIAL COMMANDS 
 
@@ -30,19 +29,6 @@ const uint8_t SK6812_RESET_TIME = 150; // UNITS=microseconds
 const uint8_t SK6812_POST_IDLE_TIME = 10; // UNITS=microseconds
 const uint8_t SK6812_WRITE_TIME = 2; // UNITS=microseconds
 const uint8_t SK6812_TOTAL_TIME = SK6812_RESET_TIME+SK6812_POST_IDLE_TIME+SK6812_WRITE_TIME; // UNITS=microseconds
-
-// conditional debugging
-#if (SERIAL_DEBUGGING_OUTPUT == ENABLED)
-#define SerialDebug(x)      Serial.print(x);   wdt_reset(); Serial.flush();
-#define SerialDebugln(x)    Serial.println(x); wdt_reset(); Serial.flush();
-#define SerialWrite(x)      Serial.write(x);   wdt_reset(); Serial.flush();
-#define SerialFlush()       Serial.flush()
-#else
-#define SerialDebug(x)      ((void) 0)
-#define SerialDebugln(x)    ((void) 0)
-#define SerialWrite(x)      ((void) 0)
-#define SerialFlush()       ((void) 0)
-#endif
 
 
 
@@ -71,7 +57,24 @@ const uint8_t SK6812_TOTAL_TIME = SK6812_RESET_TIME+SK6812_POST_IDLE_TIME+SK6812
 #define BOARD_VERSION BOARD_IS_ZWS_SMART_BLDRIVER_REV1_1
 #define BUTTONBOARD_VERSION BUTTONBOARD_IS_ZWS_6PIN_9BUTTON_RGB_LED
 #define LED_VERSION LED_IS_M280D_SAMSUNG_QUANTUMDOT
+// Note: rev1 systems require SERIAL_DEBUGGING_OUTPUT ENABLED, rev2 systems require SERIAL_DEBUGGING_OUTPUT DISABLED
+#define SERIAL_DEBUGGING_OUTPUT DISABLED
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
+
+
+// conditional debugging
+#if (SERIAL_DEBUGGING_OUTPUT == ENABLED)
+#define SerialDebug(x)      Serial.print(x);   wdt_reset(); Serial.flush();
+#define SerialDebugln(x)    Serial.println(x); wdt_reset(); Serial.flush();
+#define SerialWrite(x)      Serial.write(x);   wdt_reset(); Serial.flush();
+#define SerialFlush()       Serial.flush()
+#else
+#define SerialDebug(x)      ((void) 0)
+#define SerialDebugln(x)    ((void) 0)
+#define SerialWrite(x)      ((void) 0)
+#define SerialFlush()       ((void) 0)
+#endif
+
 
 #include "SUPPORTED_BOARDS.h"
 #include "SUPPORTED_BUTTONBOARDS.h"
