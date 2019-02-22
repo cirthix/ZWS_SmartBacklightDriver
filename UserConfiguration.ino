@@ -3,7 +3,7 @@ void UserConfiguration_SaveShutdown(uint8_t myValue){ EEPROM.put(ADDRESS_TARGET_
 
 void UserConfiguration_SaveStrobing(uint8_t myValue){ EEPROM.put(ADDRESS_SAVED_MODE, myValue); }
 
-void UserConfiguration_SaveOSD(uint8_t myValue){ EEPROM.put(ADDRESS_SAVED_OSD, myValue); }
+void UserConfiguration_SaveXHAIR(uint8_t myValue){ EEPROM.put(ADDRESS_SAVED_XHAIR, myValue); }
 
 void UserConfiguration_SaveEDID(uint8_t myValue){ EEPROM.put(ADDRESS_TARGET_EDID, myValue); }
 
@@ -24,7 +24,7 @@ EEPROM.get(ADDRESS_LED_STRUCTURE, MyConfigLED);
 void LoadSavedParameters(){
 EEPROM.get(ADDRESS_TARGET_POWERSAVE, TargetPowerSave);
 EEPROM.get(ADDRESS_SAVED_MODE, TargetMode);
-EEPROM.get(ADDRESS_SAVED_OSD, TargetOSD);
+EEPROM.get(ADDRESS_SAVED_XHAIR, TargetXHAIR);
 EEPROM.get(ADDRESS_TARGET_EDID, TargetEDID);
 EEPROM.get(ADDRESS_SAVED_BRIGHTNESS_STABLE, TargetBrightnessStable);
 EEPROM.get(ADDRESS_SAVED_BRIGHTNESS_STROBE, TargetBrightnessStrobe);
@@ -37,7 +37,7 @@ void RunFactoryProgramming() {
   // Do the factory programming here
   EEPROM.put(ADDRESS_TARGET_POWERSAVE, DefaultPowerSave);
   EEPROM.put(ADDRESS_SAVED_MODE, DefaultMode);
-  EEPROM.put(ADDRESS_SAVED_OSD, DefaultOSD);
+  EEPROM.put(ADDRESS_SAVED_XHAIR, DefaultXHAIR);
   EEPROM.put(ADDRESS_TARGET_EDID, DefaultEDID);
   EEPROM.put(ADDRESS_SAVED_BRIGHTNESS_STABLE, DefaultBrightnessStable);
   EEPROM.put(ADDRESS_SAVED_BRIGHTNESS_STROBE, DefaultBrightnessStrobe);

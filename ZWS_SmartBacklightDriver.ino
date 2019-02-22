@@ -115,7 +115,7 @@ uint16_t TargetBrightnessScan = 0; // NITS
 uint8_t TargetPowerSave;
 uint8_t TargetMode;
 uint8_t TargetEDID;
-uint8_t TargetOSD;
+uint8_t TargetXHAIR;
 uint16_t StrobePulseDuration = 1000; // microseconds
 uint16_t StrobePulseDelay = 50; // microseconds
 
@@ -573,6 +573,15 @@ void RotatePowerState(){
       UserConfiguration_SaveShutdown(TargetPowerSave);  
 }
 
+void ToggleCrosshair(){
+  // Maybe it would be best to not save this to eeprom, it may confuse users more than it helps.
+  if (TargetXHAIR == false){
+    TargetXHAIR = true;    
+  } else {
+    TargetXHAIR = false;
+  }
+}
+
 void OutputModeRotate(){
 switch (TargetMode) {
           case OUTPUT_MODE_STABLE : if(CheckCapableStrobing()== true) {OutputModeSetSave(OUTPUT_MODE_STROBE); return;} if(CheckCapableScanning()== true) {OutputModeSetSave(OUTPUT_MODE_SCAN); return; }  break;
@@ -767,6 +776,7 @@ void HandleButtonBoardInput() {
       if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_2) { TargetEDID = 2; UserConfiguration_SaveEDID(TargetEDID); }
       if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_3) { TargetEDID = 3; UserConfiguration_SaveEDID(TargetEDID); }
       if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_EDID_4) { TargetEDID = 4; UserConfiguration_SaveEDID(TargetEDID); }
+      if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_CROSSHAIR) { ToggleCrosshair(); } 
       if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_STROBE_ROTATE) { OutputModeRotate(); } 
       if (ButtonBoard.GetCurrentFilteredInput() == COMMAND_CODE_FOR_TOGGLE_STEREO_EYE) { InfraredStereoTransmitter.SwapEye(); }
     }

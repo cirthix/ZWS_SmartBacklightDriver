@@ -43,9 +43,10 @@ const uint8_t SK6812_TOTAL_TIME = SK6812_RESET_TIME+SK6812_POST_IDLE_TIME+SK6812
 #define BOARD_IS_ZWS_SMART_BLDRIVER_REV1_SCAN_HACK 2
 #define BOARD_IS_ZWS_SMART_BLDRIVER_REV1_1  3
 
-#define BUTTONBOARD_IS_ZWS_6PIN_9BUTTON_RG_LED     3
-#define BUTTONBOARD_IS_ZWS_6PIN_8BUTTON_RGB_LED    4
-#define BUTTONBOARD_IS_ZWS_7PIN_9BUTTON_RGB_LED    5
+#define BUTTONBOARD_IS_ZISWORKS   100
+#define BUTTONBOARD_IS_SAMSUNG    101
+#define BUTTONBOARD_IS_SAMSUNG_WITH_RGBLED    102
+
 
 // Note: Quantum dot support has just been aded.  It has not been tested much.  Do not use this option yet
 #define LED_IS_M280D_SAMSUNG_QUANTUMDOT 6
@@ -55,7 +56,7 @@ const uint8_t SK6812_TOTAL_TIME = SK6812_RESET_TIME+SK6812_POST_IDLE_TIME+SK6812
 
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
 #define BOARD_VERSION BOARD_IS_ZWS_SMART_BLDRIVER_REV1_1
-#define BUTTONBOARD_VERSION BUTTONBOARD_IS_ZWS_6PIN_9BUTTON_RGB_LED
+#define BUTTONBOARD_VERSION BUTTONBOARD_IS_ZISWORKS
 #define LED_VERSION LED_IS_M280D_SAMSUNG_QUANTUMDOT
 // Note: rev1 systems require SERIAL_DEBUGGING_OUTPUT ENABLED, rev2 systems require SERIAL_DEBUGGING_OUTPUT DISABLED
 #define SERIAL_DEBUGGING_OUTPUT DISABLED
@@ -98,19 +99,19 @@ const float POWER_FILTER_CONVERGENCE_RATIO = 0.0625;
 const uint16_t MaximumInputPWM = 16384;
 const uint16_t HysteresisInputPWM = 64; // TODO: Implement a better filter to avoid such large hysteresis
 
-const uint16_t ADDRESS_MAGIC_BYTE               = 0;
-const uint16_t ADDRESS_TARGET_POWERSAVE         = 1;
-const uint16_t ADDRESS_SAVED_MODE               = 2;
-const uint16_t ADDRESS_SAVED_OSD                = 3;
-const uint16_t ADDRESS_TARGET_EDID              = 4;
-const uint16_t ADDRESS_SAVED_BRIGHTNESS_STABLE  = 5;
-const uint16_t ADDRESS_SAVED_BRIGHTNESS_STROBE  = 7;
-const uint16_t ADDRESS_SAVED_BRIGHTNESS_SCAN    = 9;
-const uint16_t ADDRESS_LED_STRUCTURE            = 11;
+const uint16_t ADDRESS_MAGIC_BYTE               = 16;
+const uint16_t ADDRESS_TARGET_POWERSAVE         = 17;
+const uint16_t ADDRESS_SAVED_MODE               = 18;
+const uint16_t ADDRESS_SAVED_XHAIR              = 19;
+const uint16_t ADDRESS_TARGET_EDID              = 20;
+const uint16_t ADDRESS_SAVED_BRIGHTNESS_STABLE  = 21;
+const uint16_t ADDRESS_SAVED_BRIGHTNESS_STROBE  = 23;
+const uint16_t ADDRESS_SAVED_BRIGHTNESS_SCAN    = 25;
+const uint16_t ADDRESS_LED_STRUCTURE            = 27;
 
 const uint8_t DefaultPowerSave = TargetPowerSaveFULLY_ON;
 const uint8_t DefaultMode = OUTPUT_MODE_STABLE;
-const uint8_t DefaultOSD = false;
+const uint8_t DefaultXHAIR = false;
 const uint8_t DefaultEDID = 2; // Change this back to edid #0 after testing
 const uint16_t DefaultBrightnessStable = 125;   // nits
 const uint16_t DefaultBrightnessStrobe = 125;   // nits

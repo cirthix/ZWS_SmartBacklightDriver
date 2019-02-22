@@ -2,7 +2,7 @@
 
 struct ParsedSerialCommand {
 bool Valid;
-bool OSD;
+bool XHAIR;
 uint8_t EDID;
 uint8_t PowerSave;
 };
@@ -11,7 +11,7 @@ uint8_t PowerSave;
 uint8_t SerialCommandGenerate(){
   uint8_t mySerialCommand=0x00;
   mySerialCommand|=(1<<7);
-  if (TargetOSD == true) {   mySerialCommand|=(1<<6);  }
+  if (TargetXHAIR == true) {   mySerialCommand|=(1<<6);  }
   uint8_t myFourBits = 0x00;
   if((TargetEDID == 0) && (TargetPowerSave==TargetPowerSaveSHUTDOWN) ) { myFourBits=1; }
   if((TargetEDID == 0) && (TargetPowerSave==TargetPowerSaveLOWPOWER) ) { myFourBits=2; }
@@ -36,7 +36,7 @@ uint8_t SerialCommandGenerate(){
 }
 
 uint8_t SerialCommandExtractFixedBit(uint8_t myCommand){ return ((myCommand & (1<<7))>>7);}
-uint8_t SerialCommandExtractOSD(uint8_t myCommand){ return ((myCommand & (1<<6))>>6);}
+uint8_t SerialCommandExtractXHAIR(uint8_t myCommand){ return ((myCommand & (1<<6))>>6);}
 uint8_t SerialCommandExtractFourBits(uint8_t myCommand){ return (0x0f&(myCommand>>2));}
 uint8_t SerialCommandExtractChecksum(uint8_t myCommand){ return (0x03&myCommand);}
 uint8_t SerialCommandCalculateChecksum(uint8_t myCommand){
@@ -57,7 +57,7 @@ uint8_t SerialCommandCalculateChecksum(uint8_t myCommand){
 struct ParsedSerialCommand SerialCommandParser(uint8_t myCommand){
   struct ParsedSerialCommand myParsedSerialCommand;
   if((SerialCommandExtractFixedBit(myCommand)!=0) && (SerialCommandExtractChecksum(myCommand) == SerialCommandCalculateChecksum(myCommand))) {myParsedSerialCommand.Valid=true; } else {myParsedSerialCommand.Valid=false; } 
-  if(SerialCommandExtractOSD(myCommand)) {myParsedSerialCommand.OSD=true; } else {myParsedSerialCommand.OSD=false; } 
+  if(SerialCommandExtractXHAIR(myCommand)) {myParsedSerialCommand.XHAIR=true; } else {myParsedSerialCommand.XHAIR=false; } 
   switch (SerialCommandExtractFourBits(myCommand)) {
     case 1  : myParsedSerialCommand.EDID = 0 ; myParsedSerialCommand.PowerSave = TargetPowerSaveSHUTDOWN ; break;
     case 2  : myParsedSerialCommand.EDID = 0 ; myParsedSerialCommand.PowerSave = TargetPowerSaveLOWPOWER ; break;
@@ -76,6 +76,11 @@ struct ParsedSerialCommand SerialCommandParser(uint8_t myCommand){
     case 15 : myParsedSerialCommand.EDID = 4 ; myParsedSerialCommand.PowerSave = TargetPowerSaveFULLY_ON ; break;
     default:  myParsedSerialCommand.EDID = 0 ; myParsedSerialCommand.PowerSave = TargetPowerSaveFULLY_ON ; // Maybe set a special flag here?
   }
+  // FULLY_ON means that the display is showing an image, with panel and backlight on.
+  // LOWPOWER means that the display is off, with panel and backlight off, but with the DP recievers online so as to not disconnect from the host.
+  // SHUTDOWN powers down the DP recievers in addition to everything else that can possibly be turned off.
+  // For now, let's avoid the situation of having the DP rx disconnect and just flip between FULLY_ON and LOWPOWER states
+  if( myParsedSerialCommand.PowerSave != TargetPowerSaveFULLY_ON ) { myParsedSerialCommand.PowerSave = TargetPowerSaveLOWPOWER ;}    
   return myParsedSerialCommand;
 }
 
@@ -89,7 +94,7 @@ void PrintParsedSerialCommand(uint8_t myCommand){
   SerialDebug(F("BIT :")); SerialDebug(SerialCommandExtractFixedBit(myCommand));     SerialDebug(F("\t"));
   SerialDebug(F("SUM : ")); SerialDebug(ChecksumExtracted); SerialDebug(F(" / ")); SerialDebug(ChecsumCalculated);     SerialDebug(F("\t"));
   if(myParsedSerialCommand.Valid==true ) {SerialDebug(F("VALID"));} else {  SerialDebug(F("INVALID"));}     SerialDebug(F("\t"));
-  if(myParsedSerialCommand.OSD==true ) {SerialDebug(F("OK OSD"));} else {  SerialDebug(F("NO OSD"));}     SerialDebug(F("\t")); 
+  if(myParsedSerialCommand.XHAIR==true ) {SerialDebug(F("OK XHAIR"));} else {  SerialDebug(F("NO XHAIR"));}     SerialDebug(F("\t")); 
   SerialDebug(F("4BITs :")); SerialDebug(SerialCommandExtractFourBits(myCommand));     SerialDebug(F("\t"));
   SerialDebug(F("EDID :")); SerialDebug(myParsedSerialCommand.EDID);     SerialDebug(F("\t"));
   SerialDebug(F("PowerSave :")); SerialDebug(myParsedSerialCommand.PowerSave);     SerialDebugln(F(""));  

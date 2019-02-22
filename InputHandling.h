@@ -1,5 +1,6 @@
 #ifndef INPUTHANDLING_h
 #define INPUTHANDLING_h
+#include <Arduino.h>
 #include "constants.h"
 
 #define FILTERDEPTH_INPUT 8
@@ -26,9 +27,7 @@ const uint8_t ASCII_CODE_FOR_EDID_5                 = 0x35; // '5' Sets internal
 const uint8_t ASCII_CODE_FOR_EDID_6                 = 0x36; // '6' Sets internal edid #6
 const uint8_t ASCII_CODE_FOR_EDID_7                 = 0x37; // '7' Sets internal edid #7
 const uint8_t ASCII_CODE_FOR_STROBE_ROTATE          = 0x21; // '!' toggles strobing mode (if supported)
-const uint8_t ASCII_CODE_FOR_PANEL_OSD              = 0x23; // '#' toggles the GPIO for enabling the OSD (if supported)
-const uint8_t ASCII_CODE_FOR_OCTESTMODE_ON          = 0x5B; // '[' Enables oc test mode
-const uint8_t ASCII_CODE_FOR_OCTESTMODE_OFF         = 0x5D; // ']' Disables oc test mode
+const uint8_t ASCII_CODE_FOR_CROSSHAIR              = 0x5B; // '[' toggles crosshair
 const uint8_t ASCII_CODE_FOR_OSD_ON                 = 0x3C; // '<' Enables the OSD
 const uint8_t ASCII_CODE_FOR_OSD_OFF                = 0x3E; // '>' Disables the OSD
 const uint8_t ASCII_CODE_FOR_POWER_ON               = 0x7B; // '{' Powers on the device
@@ -63,24 +62,18 @@ const uint8_t COMMAND_CODE_FOR_EDID_5                 = ASCII_CODE_FOR_EDID_5   
 const uint8_t COMMAND_CODE_FOR_EDID_6                 = ASCII_CODE_FOR_EDID_6                 ;
 const uint8_t COMMAND_CODE_FOR_EDID_7                 = ASCII_CODE_FOR_EDID_7                 ;
 const uint8_t COMMAND_CODE_FOR_STROBE_ROTATE          = ASCII_CODE_FOR_STROBE_ROTATE          ;
-const uint8_t COMMAND_CODE_FOR_PANEL_OSD              = ASCII_CODE_FOR_PANEL_OSD              ;
 const uint8_t COMMAND_CODE_FOR_CONDITIONAL_ROTATE     = ASCII_CODE_FOR_EDID_ROTATE            ;
-const uint8_t COMMAND_CODE_FOR_OCTESTMODE_ON          = ASCII_CODE_FOR_OCTESTMODE_ON          ;
-const uint8_t COMMAND_CODE_FOR_OCTESTMODE_OFF         = ASCII_CODE_FOR_OCTESTMODE_OFF         ;
+const uint8_t COMMAND_CODE_FOR_CROSSHAIR              = ASCII_CODE_FOR_CROSSHAIR              ;
 const uint8_t COMMAND_CODE_FOR_OSD_ON                 = ASCII_CODE_FOR_OSD_ON                 ;
 const uint8_t COMMAND_CODE_FOR_OSD_OFF                = ASCII_CODE_FOR_OSD_OFF                ;
 const uint8_t COMMAND_CODE_FOR_POWER_ON               = ASCII_CODE_FOR_POWER_ON               ;
-const uint8_t COMMAND_CODE_FOR_POWER_OFF              = ASCII_CODE_FOR_POWER_OFF              ;
 const uint8_t COMMAND_CODE_FOR_TOGGLE_STEREO_EYE      = ASCII_CODE_FOR_TOGGLE_STEREO_EYE      ;
 const uint8_t COMMAND_CODE_FOR_STEREO_ENABLE          = ASCII_CODE_FOR_STEREO_ENABLE          ;
 const uint8_t COMMAND_CODE_FOR_STEREO_DISABLE         = ASCII_CODE_FOR_STEREO_DISABLE         ;
+const uint8_t COMMAND_CODE_FOR_POWER_OFF              = ASCII_CODE_FOR_POWER_OFF              ;
 const uint8_t COMMAND_CODE_FOR_SIMPLE_DEBUG_COMMAND   = ASCII_CODE_FOR_SIMPLE_DEBUG_COMMAND   ;
 
 
-const uint8_t BUTTON_0_MASK = 1<<0 ;
-const uint8_t BUTTON_1_MASK = 1<<1 ;
-const uint8_t BUTTON_2_MASK = 1<<2 ;
-const uint8_t BUTTON_3_MASK = 1<<3 ;
 
 
 class InputHandling
@@ -96,6 +89,8 @@ public:
   void PrintState();
   void PrintButtons();
 private:
+ uint8_t ReadPhysicalInputsSamsung();
+ uint8_t ReadPhysicalInputsZisworks();
  void SetInputHistory(uint8_t state);
  uint8_t input_history[FILTERDEPTH_INPUT];
  uint8_t input_index ;  
@@ -104,40 +99,8 @@ private:
  uint8_t filter_is_dirty;
 
  
- 
-// These values are for a system with a 10kohm pullup and pulldowns in series with buttons, having values of 0, 10k, 4.7k, and 1k.
-//const uint16_t abserror          = 15;
-//const float relerror             = 0.10;
-//const uint16_t cutoff_zero       = 0;
-//const uint16_t cutoff_zero_low   = cutoff_zero;
-//const uint16_t cutoff_zero_high  = cutoff_zero+(abserror+cutoff_zero*relerror);
-//const uint16_t cutoff_one        = 93;
-//const uint16_t cutoff_one_low    = cutoff_one-(abserror+cutoff_one*relerror);
-//const uint16_t cutoff_one_high   = cutoff_one+(abserror+cutoff_one*relerror);
-//const uint16_t cutoff_two        = 530;
-//const uint16_t cutoff_two_low    = cutoff_two-(abserror+cutoff_two*relerror);
-//const uint16_t cutoff_two_high   = cutoff_two+(abserror+cutoff_two*relerror);
-//const uint16_t cutoff_three      = 930;
-//const uint16_t cutoff_three_low  = cutoff_three-(abserror+cutoff_three*relerror);
-//const uint16_t cutoff_three_high = cutoff_three+(abserror+cutoff_three*relerror);
 
 
- 
-// These values are for a system with a 1kohm pullup and pulldowns in series with buttons, having values of 0, 4.02k, 2k, and 1k.
-const uint16_t abserror          = 15;
-const float relerror             = 0.10;
-const uint16_t cutoff_zero       = 0;
-const uint16_t cutoff_zero_low   = cutoff_zero;
-const uint16_t cutoff_zero_high  = cutoff_zero+(abserror+cutoff_zero*relerror);
-const uint16_t cutoff_one        = 512;
-const uint16_t cutoff_one_low    = cutoff_one-(abserror+cutoff_one*relerror);
-const uint16_t cutoff_one_high   = cutoff_one+(abserror+cutoff_one*relerror);
-const uint16_t cutoff_two        = 682;
-const uint16_t cutoff_two_low    = cutoff_two-(abserror+cutoff_two*relerror);
-const uint16_t cutoff_two_high   = cutoff_two+(abserror+cutoff_two*relerror);
-const uint16_t cutoff_three      = 819;
-const uint16_t cutoff_three_low  = cutoff_three-(abserror+cutoff_three*relerror);
-const uint16_t cutoff_three_high = cutoff_three+(abserror+cutoff_three*relerror);
 
 
 };
