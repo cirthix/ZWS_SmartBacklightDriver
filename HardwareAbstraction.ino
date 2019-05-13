@@ -1,3 +1,40 @@
+uint8_t GetAbstractedPin(uint8_t LedStringMapping){
+  switch(LedStringMapping){
+    case 1 : 
+             #ifdef BLDRIVER_PWM_1
+               return BLDRIVER_PWM_1;
+             #endif
+             break;
+    case 2 : 
+             #ifdef BLDRIVER_PWM_2
+               return BLDRIVER_PWM_2;
+             #endif
+             break;
+    case 3 : 
+             #ifdef BLDRIVER_PWM_3
+               return BLDRIVER_PWM_3;
+             #endif
+             break;
+    case 4 : 
+             #ifdef BLDRIVER_PWM_4
+               return BLDRIVER_PWM_4;
+             #endif
+             break;
+    case 5 : 
+             #ifdef BLDRIVER_PWM_5
+               return BLDRIVER_PWM_5;
+             #endif
+             break;
+    case 6 : 
+             #ifdef BLDRIVER_PWM_6
+               return BLDRIVER_PWM_6;
+             #endif
+             break;
+    default : ;
+  }
+  return MY_INVALID_PIN;
+}
+
 void ClearTimer1InterruptFlags(){  
         TIFR1 = (1 << ICF1) | (1 << OCF1A) | (1 << OCF1B) | (1 << TOV1); // Clear timer 1 interrupts for a fresh start
 }

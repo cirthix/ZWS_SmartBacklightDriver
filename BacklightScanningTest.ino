@@ -1,9 +1,12 @@
 const uint16_t ScanTestOntime=1000;  // milliseconds
-const uint16_t ScanTestOfftime=1000; // microseconds
+const uint16_t ScanTestOfftime=1000; // milliseconds
 
 void EnterScanningTest(){
   if( MyConfigLED.SupportsScanning != true ) { return ;}
-  SerialDebugln(F("Scanning test - check order of illumination"));
+//  Serial.println(F("Scanning test - check order of illumination"));
+//  Serial.print(F("StringMapping: "));
+//  for(uint8_t LEDStringID=0; LEDStringID<TargetConfigLED.NumberStrings; LEDStringID++){ Serial.print(LEDStringID); Serial.print(F("->")); Serial.print(GetAbstractedPin(TargetConfigLED.StringOrdering[0])); Serial.print(F("      "));}
+//  Serial.println("");  
     adimWrite(CALCULATED_ADIM_STABLE);  // enable this by setting to CALCULATED_ADIM_SCAN after the timing is verified good
     OUTPUT_MODE = OUTPUT_MODE_OFF;
     IndicateNewState(); 
@@ -13,67 +16,13 @@ void EnterScanningTest(){
     delay(1000);
 }
   
-
-void RunScanningTest(){
-    #ifdef BLDRIVER_PWM_1
-       pinMode(BLDRIVER_PWM_1, OUTPUT);
-       digitalWrite(BLDRIVER_PWM_1, LOW );
-    #endif
-    #ifdef BLDRIVER_PWM_2
-       pinMode(BLDRIVER_PWM_2, OUTPUT);
-       digitalWrite(BLDRIVER_PWM_2, LOW );
-    #endif
-    #ifdef BLDRIVER_PWM_3
-       pinMode(BLDRIVER_PWM_3, OUTPUT);
-       digitalWrite(BLDRIVER_PWM_3, LOW );
-    #endif
-    #ifdef BLDRIVER_PWM_4
-       pinMode(BLDRIVER_PWM_4, OUTPUT);
-       digitalWrite(BLDRIVER_PWM_4, LOW );
-    #endif
-    #ifdef BLDRIVER_PWM_5
-       pinMode(BLDRIVER_PWM_5, OUTPUT);
-       digitalWrite(BLDRIVER_PWM_5, LOW );
-    #endif
-    #ifdef BLDRIVER_PWM_6
-       pinMode(BLDRIVER_PWM_6, OUTPUT);
-       digitalWrite(BLDRIVER_PWM_6, LOW );
-    #endif
-       delay(ScanTestOfftime);
-    #ifdef BLDRIVER_PWM_1
-       digitalWrite2(BLDRIVER_PWM_1, HIGH);
-       delay(ScanTestOntime);
-       digitalWrite2(BLDRIVER_PWM_1, LOW );
-       delay(ScanTestOfftime);
-    #endif
-    #ifdef BLDRIVER_PWM_2
-       digitalWrite2(BLDRIVER_PWM_2, HIGH);
-       delay(ScanTestOntime);
-       digitalWrite2(BLDRIVER_PWM_2, LOW );
-       delay(ScanTestOfftime);
-    #endif
-    #ifdef BLDRIVER_PWM_3
-       digitalWrite2(BLDRIVER_PWM_3, HIGH);
-       delay(ScanTestOntime);
-       digitalWrite2(BLDRIVER_PWM_3, LOW );
-       delay(ScanTestOfftime);
-    #endif
-    #ifdef BLDRIVER_PWM_4
-       digitalWrite2(BLDRIVER_PWM_4, HIGH);
-       delay(ScanTestOntime);
-       digitalWrite2(BLDRIVER_PWM_4, LOW );
-       delay(ScanTestOfftime);
-    #endif
-    #ifdef BLDRIVER_PWM_5
-       digitalWrite2(BLDRIVER_PWM_5, HIGH);
-       delay(ScanTestOntime);
-       digitalWrite2(BLDRIVER_PWM_5, LOW );
-       delay(ScanTestOfftime);
-    #endif
-    #ifdef BLDRIVER_PWM_6
-       digitalWrite2(BLDRIVER_PWM_6, HIGH);
-       delay(ScanTestOntime);
-       digitalWrite2(BLDRIVER_PWM_6, LOW );
-       delay(ScanTestOfftime);
-    #endif
+void RunScanningTest(){    
+  for(uint8_t LEDStringID=0; LEDStringID<TargetConfigLED.NumberStrings; LEDStringID++){
+    if(GetAbstractedPin(TargetConfigLED.StringOrdering[LEDStringID]) != MY_INVALID_PIN) { pinMode(GetAbstractedPin(TargetConfigLED.StringOrdering[LEDStringID]), OUTPUT); digitalWrite(GetAbstractedPin(TargetConfigLED.StringOrdering[LEDStringID]), LOW );}
+  }    
+    delay(ScanTestOfftime);    
+  for(uint8_t LEDStringID=0; LEDStringID<TargetConfigLED.NumberStrings; LEDStringID++){
+    if(GetAbstractedPin(TargetConfigLED.StringOrdering[LEDStringID]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[LEDStringID]), HIGH); delay(ScanTestOntime); digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[LEDStringID]), LOW ); delay(ScanTestOfftime);}
+  }
 }
+

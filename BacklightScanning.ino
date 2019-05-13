@@ -86,36 +86,21 @@ void ConfigureTimersScanning(){
 }
 
 
-
 ISR(TIMER1_COMPA_vect) {
-  // TODO: Fix this to compatible with the 6ch board.  Check the MyConfigLED.NumberStrings value to determine instead of assuming four strings
   switch(ScanningState){
-    #ifdef BLDRIVER_PWM_2
-      case SEGMENT_2_ON:  digitalWrite2(BLDRIVER_PWM_2, HIGH);  ScanningState=SEGMENT_2_OFF; OCR1A=GetScanTime3();   break;
-      case SEGMENT_2_OFF: digitalWrite2(BLDRIVER_PWM_2, LOW );  ScanningState=SEGMENT_3_ON;  OCR1A=GetScanTime4();   break;
-    #endif
-    #ifdef BLDRIVER_PWM_3
-      case SEGMENT_3_ON:  digitalWrite2(BLDRIVER_PWM_3, HIGH);  ScanningState=SEGMENT_3_OFF; OCR1A=GetScanTime5();   break;
-      case SEGMENT_3_OFF: digitalWrite2(BLDRIVER_PWM_3, LOW );  ScanningState=SEGMENT_4_ON;  OCR1A=GetScanTime6();   break;    
-    #endif
-    #ifdef BLDRIVER_PWM_4
-      case SEGMENT_4_ON:  digitalWrite2(BLDRIVER_PWM_4, HIGH);  ScanningState=SEGMENT_4_OFF; OCR1A=GetScanTime7();   break;
-      case SEGMENT_4_OFF: digitalWrite2(BLDRIVER_PWM_4, LOW );  ScanningState=SEGMENT_1_ON;  OCR1A=GetScanTime0();   InfraredStereoTransmitter.SendInfraredSyncToGlasses_PulsedBacklight(); break;
-   // case SEGMENT_4_OFF: digitalWrite2(BLDRIVER_PWM_4, LOW );  ScanningState=SEGMENT_5_ON;  OCR1A=GetScanTime8();   break;
-    #endif
-    #ifdef BLDRIVER_PWM_5
-      case SEGMENT_5_ON:  digitalWrite2(BLDRIVER_PWM_5, HIGH);  ScanningState=SEGMENT_5_OFF; OCR1A=GetScanTime9();   break;
-      case SEGMENT_5_OFF: digitalWrite2(BLDRIVER_PWM_5, LOW );  ScanningState=SEGMENT_6_ON;  OCR1A=GetScanTime10();  break;
-    #endif
-    #ifdef BLDRIVER_PWM_6
-      case SEGMENT_6_ON:  digitalWrite2(BLDRIVER_PWM_6, HIGH);  ScanningState=SEGMENT_6_OFF; OCR1A=GetScanTime11();  break;
-      case SEGMENT_6_OFF: digitalWrite2(BLDRIVER_PWM_6, LOW );  ScanningState=SEGMENT_1_ON;  OCR1A=GetScanTime0();   break;
-    #endif
-    #ifdef BLDRIVER_PWM_1
-      case SEGMENT_1_ON:  digitalWrite2(BLDRIVER_PWM_1, HIGH);  ScanningState=SEGMENT_1_OFF; OCR1A=GetScanTime1();   break;
-      case SEGMENT_1_OFF: digitalWrite2(BLDRIVER_PWM_1, LOW );  ScanningState=SEGMENT_2_ON;  OCR1A=GetScanTime2();   break;
-      default :           digitalWrite2(BLDRIVER_PWM_1, HIGH);  ScanningState=SEGMENT_1_OFF; OCR1A=GetScanTime1();   break;
-    #endif
+      case SEGMENT_1_ON:                                         if(GetAbstractedPin(TargetConfigLED.StringOrdering[0]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[0]), HIGH); }  ScanningState=SEGMENT_1_OFF; OCR1A=GetScanTime1();  break;
+      case SEGMENT_1_OFF:                                        if(GetAbstractedPin(TargetConfigLED.StringOrdering[0]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[0]), LOW ); }  ScanningState=SEGMENT_2_ON;  OCR1A=GetScanTime2();  break;
+      case SEGMENT_2_ON:  if(TargetConfigLED.NumberStrings >=2) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[1]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[1]), HIGH); }  ScanningState=SEGMENT_2_OFF; OCR1A=GetScanTime3();  break;}
+      case SEGMENT_2_OFF: if(TargetConfigLED.NumberStrings >=2) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[1]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[1]), LOW ); }  ScanningState=SEGMENT_3_ON;  OCR1A=GetScanTime4();  break;}
+      case SEGMENT_3_ON:  if(TargetConfigLED.NumberStrings >=3) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[2]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[2]), HIGH); }  ScanningState=SEGMENT_3_OFF; OCR1A=GetScanTime5();  break;}
+      case SEGMENT_3_OFF: if(TargetConfigLED.NumberStrings >=3) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[2]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[2]), LOW ); }  ScanningState=SEGMENT_4_ON;  OCR1A=GetScanTime6();  break;}
+      case SEGMENT_4_ON:  if(TargetConfigLED.NumberStrings >=4) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[3]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[3]), HIGH); }  ScanningState=SEGMENT_4_OFF; OCR1A=GetScanTime7();  break;}
+      case SEGMENT_4_OFF: if(TargetConfigLED.NumberStrings >=4) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[3]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[3]), LOW ); }  ScanningState=SEGMENT_5_ON;  OCR1A=GetScanTime8();  break;}
+      case SEGMENT_5_ON:  if(TargetConfigLED.NumberStrings >=5) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[4]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[4]), HIGH); }  ScanningState=SEGMENT_5_OFF; OCR1A=GetScanTime9();  break;}
+      case SEGMENT_5_OFF: if(TargetConfigLED.NumberStrings >=5) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[4]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[4]), LOW ); }  ScanningState=SEGMENT_6_ON;  OCR1A=GetScanTime10(); break;}
+      case SEGMENT_6_ON:  if(TargetConfigLED.NumberStrings >=6) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[5]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[5]), HIGH); }  ScanningState=SEGMENT_6_OFF; OCR1A=GetScanTime11(); break;}
+      case SEGMENT_6_OFF: if(TargetConfigLED.NumberStrings >=6) {if(GetAbstractedPin(TargetConfigLED.StringOrdering[5]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[5]), LOW ); }  ScanningState=SEGMENT_1_ON;  OCR1A=GetScanTime0();  break;}
+      default :                                                  if(GetAbstractedPin(TargetConfigLED.StringOrdering[0]) != MY_INVALID_PIN) { digitalWrite2(GetAbstractedPin(TargetConfigLED.StringOrdering[0]), HIGH); }  ScanningState=SEGMENT_1_OFF; OCR1A=GetScanTime1();   break;
   }
 }
 

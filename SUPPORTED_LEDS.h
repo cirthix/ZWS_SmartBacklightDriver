@@ -16,6 +16,7 @@ float CurrentToBrightnessIntercept ;
 float CurrentToBrightnessSlope  ;
 float CurrentToVoltageIntercept  ;
 float CurrentToVoltageSlope  ;
+uint8_t StringOrdering[6] ;
 };
 
 
@@ -32,7 +33,23 @@ true,
 1.80905243888213,
 2.85128739427457,
 36978.3217866044,
-13.9148883455194
+13.9148883455194,
+{1,2,3,4,0,0}
+};
+
+const ConfigLED ConfigLED_LED_IS_M280D_SAMSUNG_QUANTUMDOT_REVERSED = {
+"QuantumDotM280",
+true,
+18000, // Samsung U28H750 config uses up 15.5w.  However, there is some error on the output current setting, so this should be ok.
+50,
+160, // Samsung U28H750 uses 102mA maximum 100% dutycycle, set conservative max at +60% limit
+4,
+3,
+1.80905243888213,
+2.85128739427457,
+36978.3217866044,
+13.9148883455194,
+{4,3,2,1,0,0}
 };
 
 
@@ -47,7 +64,8 @@ true,
 39.929,
 1.6,  // If this is over 1.6, it breaks the system.  wtf???
 32190,
-26.6
+26.6,
+{1,2,3,4,0,0}
 };
 
 
@@ -62,7 +80,8 @@ true,
 39.929,
 0.838345,
 32190,
-13.3
+13.3,
+{1,2,3,4,0,0}
 };
 
 const ConfigLED ConfigLED_LED_IS_M270HHF = {
@@ -76,7 +95,8 @@ false,
 39.929,
 1.67669,
 32190,
-26.6
+26.6,
+{1,2,3,4,0,0}
 };
 
 
@@ -85,6 +105,8 @@ false,
   #define TargetConfigLED ConfigLED_LED_IS_M280DGJ
 #elif LED_VERSION==LED_IS_M280D_SAMSUNG_QUANTUMDOT
   #define TargetConfigLED ConfigLED_LED_IS_M280D_SAMSUNG_QUANTUMDOT
+#elif LED_VERSION==LED_IS_M280D_SAMSUNG_QUANTUMDOT_REVERSED
+  #define TargetConfigLED ConfigLED_LED_IS_M280D_SAMSUNG_QUANTUMDOT_REVERSED
 #elif LED_VERSION==LED_IS_V390DK
   #define TargetConfigLED ConfigLED_LED_IS_V390DK
 #elif LED_VERSION==LED_IS_M270HHF

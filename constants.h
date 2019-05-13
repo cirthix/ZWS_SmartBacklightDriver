@@ -47,17 +47,16 @@ const uint8_t SK6812_TOTAL_TIME = SK6812_RESET_TIME+SK6812_POST_IDLE_TIME+SK6812
 #define BUTTONBOARD_IS_SAMSUNG    101
 #define BUTTONBOARD_IS_SAMSUNG_WITH_RGBLED    102
 
-
-// Note: Quantum dot support has just been aded.  It has not been tested much.  Do not use this option yet
 #define LED_IS_M280D_SAMSUNG_QUANTUMDOT 6
-#define LED_IS_M280DGJ    7
-#define LED_IS_V390DK     8
-#define LED_IS_M270HHF    9
+#define LED_IS_M280D_SAMSUNG_QUANTUMDOT_REVERSED 7
+#define LED_IS_M280DGJ    8
+#define LED_IS_V390DK     9
+#define LED_IS_M270HHF    10
 
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
 #define BOARD_VERSION BOARD_IS_ZWS_SMART_BLDRIVER_REV1_1
 #define BUTTONBOARD_VERSION BUTTONBOARD_IS_ZISWORKS
-#define LED_VERSION LED_IS_M280D_SAMSUNG_QUANTUMDOT
+#define LED_VERSION LED_IS_M280D_SAMSUNG_QUANTUMDOT_REVERSED
 // Note: rev1 systems require SERIAL_DEBUGGING_OUTPUT ENABLED, rev2 systems require SERIAL_DEBUGGING_OUTPUT DISABLED
 #define SERIAL_DEBUGGING_OUTPUT DISABLED
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
