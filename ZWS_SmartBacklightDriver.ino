@@ -1,3 +1,6 @@
+//////////////////// GO TO CONSTANTS.H FILE TO SET PANEL AND REV1/REV2 SYSTEM VERSION NEAR LINE 60 //////////////////////
+
+
 /*
  * THIS CODE WILL FAIL TO COMPILE IN AN UNMODIFIED ARDUINO ENVIRONMENT! 
  * License for use is granted for use with ZisWorks hardware only.  Use of this code for any other purpose is prohibited.
@@ -120,7 +123,7 @@ uint16_t StrobePulseDuration = 1000; // microseconds
 uint16_t StrobePulseDelay = 50; // microseconds
 
 // LED CONFIGURATION REGISTERS
-ConfigLED MyConfigLED;
+ConfigLED MyConfigLED = TargetConfigLED;
 
 
 // CALCULATED REGISTERS
@@ -284,7 +287,7 @@ void setup()
 
   SerialFlush();
   Serial.begin(SERIAL_BAUD); // Note: not yet overclocked.
-  SerialDebug(F("BUILD: ")); SerialDebugln(F("" __DATE__ " " __TIME__ "\n"));
+  SerialDebug(F("BUILD: ")); SerialDebugln(F("" __DATE__ " " __TIME__ ""));
   SerialDebug(F("PCB: ")); board_print_name();
   //  SerialDebug(F("BUTTONS: ")); buttonboard_print_name();
   
@@ -297,7 +300,7 @@ void setup()
 
   SerialDebugln(F("\nINIT/CONFIG"));
   SerialFlush(); // Flush serial output in case something goes horribly wrong, that way we guarantee seeing the last line of output.
-  LoadParametersLED();
+  // LoadParametersLED();  // Don't bother, just use the compile-time constant
   LoadSavedParameters();
   SerialDebugln(F("\t->OK"));
 
@@ -415,7 +418,7 @@ void Task1000ms() {
 }
 
 void Task10000ms() {
-  PrintDebugSerialStateToSlaves();
+ // PrintDebugSerialStateToSlaves();  // Enabling is nice, but it causes the status led to blink (usually green) periodically
 //  PrintParameters();
   //  myTemp=myTemp+1;
   //  analogWrite(BUTTONBOARD_LED_G, myTemp);
@@ -1425,5 +1428,3 @@ void UpdateStateLED(){
    }
    #endif
 }
-
-

@@ -1,4 +1,3 @@
-
 #ifndef CONSTANTS_h
 #define CONSTANTS_h
 
@@ -46,19 +45,21 @@ const uint8_t SK6812_TOTAL_TIME = SK6812_RESET_TIME+SK6812_POST_IDLE_TIME+SK6812
 #define BUTTONBOARD_IS_ZISWORKS   100
 #define BUTTONBOARD_IS_SAMSUNG    101
 #define BUTTONBOARD_IS_SAMSUNG_WITH_RGBLED    102
+#define BUTTONBOARD_IS_ZISWORKS_WITH_OLD_REV1_PIN_MAPPING   103
 
 #define LED_IS_M280D_SAMSUNG_QUANTUMDOT 6
 #define LED_IS_M280D_SAMSUNG_QUANTUMDOT_REVERSED 7
 #define LED_IS_M280DGJ    8
+#define LED_IS_M280DGJ_merge_expeirment    11
 #define LED_IS_V390DK     9
 #define LED_IS_M270HHF    10
 
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
 #define BOARD_VERSION BOARD_IS_ZWS_SMART_BLDRIVER_REV1_1
-#define BUTTONBOARD_VERSION BUTTONBOARD_IS_ZISWORKS
-#define LED_VERSION LED_IS_M280D_SAMSUNG_QUANTUMDOT_REVERSED
+#define BUTTONBOARD_VERSION BUTTONBOARD_IS_ZISWORKS_WITH_OLD_REV1_PIN_MAPPING
+#define LED_VERSION LED_IS_M280DGJ
 // Note: rev1 systems require SERIAL_DEBUGGING_OUTPUT ENABLED, rev2 systems require SERIAL_DEBUGGING_OUTPUT DISABLED
-#define SERIAL_DEBUGGING_OUTPUT DISABLED
+#define SERIAL_DEBUGGING_OUTPUT ENABLED
 //////////////////////////////////////////////////////////////////////// CHANGE SYSTEM CONFIGURATION PARAMETERS HERE ////////////////////////////////////////////////////////////////////////
 
 
@@ -111,7 +112,7 @@ const uint16_t ADDRESS_LED_STRUCTURE            = 27;
 const uint8_t DefaultPowerSave = TargetPowerSaveFULLY_ON;
 const uint8_t DefaultMode = OUTPUT_MODE_STABLE;
 const uint8_t DefaultXHAIR = false;
-const uint8_t DefaultEDID = 2; // Change this back to edid #0 after testing
+const uint8_t DefaultEDID = 1; // Change this back to edid #0 after testing
 const uint16_t DefaultBrightnessStable = 125;   // nits
 const uint16_t DefaultBrightnessStrobe = 125;   // nits
 const uint16_t DefaultBrightnessScan   = 125;   // nits

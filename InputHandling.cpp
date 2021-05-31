@@ -7,7 +7,7 @@ InputHandling::ResetInputHistory();
 void  InputHandling::ReadPhysicalInputs() {     
   if (input_index < FILTERDEPTH_INPUT-1) { input_index ++;  } else { input_index=0; }
 filter_is_dirty=1;
-  #if BUTTONBOARD_VERSION==BUTTONBOARD_IS_ZISWORKS
+  #if BUTTONBOARD_VERSION==BUTTONBOARD_IS_ZISWORKS || BUTTONBOARD_VERSION==BUTTONBOARD_IS_ZISWORKS_WITH_OLD_REV1_PIN_MAPPING
    input_history[input_index] = InputHandling::ReadPhysicalInputsZisworks();
   #endif
   #if BUTTONBOARD_VERSION==BUTTONBOARD_IS_SAMSUNG || BUTTONBOARD_VERSION==BUTTONBOARD_IS_SAMSUNG_WITH_RGBLED
@@ -50,9 +50,9 @@ uint16_t adc_key_in = analogRead(BUTTONBOARD_C_BUTTON);
 }
 
 uint8_t InputHandling::ReadPhysicalInputsZisworks(){
-  #if BUTTONBOARD_VERSION==BUTTONBOARD_IS_ZISWORKS
-uint8_t button_combinations=0;
- uint16_t adc_key_in; 
+#if BUTTONBOARD_VERSION==BUTTONBOARD_IS_ZISWORKS || BUTTONBOARD_VERSION==BUTTONBOARD_IS_ZISWORKS_WITH_OLD_REV1_PIN_MAPPING
+  uint8_t button_combinations=0;
+  uint16_t adc_key_in; 
  
 const uint8_t BUTTON_EDID_MASK   =  0 ;
 const uint8_t BUTTON_UP_MASK     =  1 ;
@@ -68,7 +68,13 @@ adc_key_in = analogRead(BUTTONBOARD_A_BUTTON);
 adc_key_in = analogRead(BUTTONBOARD_B_BUTTON);   
  if ((adc_key_in >= cutoff_zero_low)  && (adc_key_in <= cutoff_zero_high))  { button_combinations|=(0x01<<BUTTON_DOWN_MASK);}
  if ((adc_key_in >= cutoff_one_low)   && (adc_key_in <= cutoff_one_high))   { return COMMAND_CODE_FOR_STROBE_ROTATE; }
+ 
+ #if BUTTONBOARD_VERSION==BUTTONBOARD_IS_ZISWORKS_WITH_OLD_REV1_PIN_MAPPING
+ if ((adc_key_in >= cutoff_two_low)   && (adc_key_in <= cutoff_two_high))   { return COMMAND_CODE_FOR_EDID_4; }
+ #else
  if ((adc_key_in >= cutoff_two_low)   && (adc_key_in <= cutoff_two_high))   { return COMMAND_CODE_FOR_CROSSHAIR; }
+ #endif
+  
  if ((adc_key_in >= cutoff_three_low) && (adc_key_in <= cutoff_three_high)) { return COMMAND_CODE_FOR_EDID_3; }
  
 if(digitalRead(BUTTONBOARD_POWER_BUTTON)==LOW) {  button_combinations|=(0x01<<BUTTON_POWER_MASK);}

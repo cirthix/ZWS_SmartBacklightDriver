@@ -23,7 +23,7 @@ uint8_t StringOrdering[6] ;
 
 
 const ConfigLED ConfigLED_LED_IS_M280D_SAMSUNG_QUANTUMDOT = {
-"QuantumDotM280",
+"QuantumDotM280 ",
 true,
 18000, // Samsung U28H750 config uses up 15.5w.  However, there is some error on the output current setting, so this should be ok.
 50,
@@ -38,7 +38,7 @@ true,
 };
 
 const ConfigLED ConfigLED_LED_IS_M280D_SAMSUNG_QUANTUMDOT_REVERSED = {
-"QuantumDotM280",
+"QuantumDotM280r",
 true,
 18000, // Samsung U28H750 config uses up 15.5w.  However, there is some error on the output current setting, so this should be ok.
 50,
@@ -52,6 +52,21 @@ true,
 {4,3,2,1,0,0}
 };
 
+
+const ConfigLED ConfigLED_LED_IS_M280DGJ_merge_expeirment = {
+"QuantumDotM280_",
+true,
+18000, // Samsung U28H750 config uses up 15.5w.  However, there is some error on the output current setting, so this should be ok.
+50,
+160, // Samsung U28H750 uses 102mA maximum 100% dutycycle, set conservative max at +60% limit
+4,
+3,
+1.6,  // If this is over 1.6, it breaks the system.  wtf???
+2.85128739427457,
+36978.3217866044,
+13.9148883455194,
+{1,2,3,4,0,0}
+};
 
 const ConfigLED ConfigLED_LED_IS_M280DGJ = {
 "ExtraSafe M280D",
@@ -70,7 +85,7 @@ true,
 
 
 const ConfigLED ConfigLED_LED_IS_V390DK = {
-"INNOLUX V390DK",
+"INNOLUX V390DK ",
 true,
 45000,
 50,  // 145*2 is the maximum 100% point
@@ -103,6 +118,8 @@ false,
 
 #if LED_VERSION==LED_IS_M280DGJ
   #define TargetConfigLED ConfigLED_LED_IS_M280DGJ
+#elif LED_VERSION==LED_IS_M280DGJ_merge_expeirment
+  #define TargetConfigLED ConfigLED_LED_IS_M280DGJ_merge_expeirment
 #elif LED_VERSION==LED_IS_M280D_SAMSUNG_QUANTUMDOT
   #define TargetConfigLED ConfigLED_LED_IS_M280D_SAMSUNG_QUANTUMDOT
 #elif LED_VERSION==LED_IS_M280D_SAMSUNG_QUANTUMDOT_REVERSED
