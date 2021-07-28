@@ -59,23 +59,30 @@ const uint8_t BUTTON_UP_MASK     =  1 ;
 const uint8_t BUTTON_DOWN_MASK   =  2 ;
 const uint8_t BUTTON_POWER_MASK  =  3 ;
 
+
+#if BUTTONBOARD_VERSION==BUTTONBOARD_IS_ZISWORKS_WITH_OLD_REV1_PIN_MAPPING
+adc_key_in = analogRead(BUTTONBOARD_A_BUTTON); 
+ if ((adc_key_in >= cutoff_zero_low)  && (adc_key_in <= cutoff_zero_high))  { button_combinations|=(0x01<<BUTTON_UP_MASK);}
+ if ((adc_key_in >= cutoff_one_low)   && (adc_key_in <= cutoff_one_high))   { return COMMAND_CODE_FOR_EDID_1; }
+ if ((adc_key_in >= cutoff_two_low)   && (adc_key_in <= cutoff_two_high))   { return COMMAND_CODE_FOR_EDID_4; }
+ if ((adc_key_in >= cutoff_three_low) && (adc_key_in <= cutoff_three_high)) { return COMMAND_CODE_FOR_EDID_0; }
+adc_key_in = analogRead(BUTTONBOARD_B_BUTTON);   
+ if ((adc_key_in >= cutoff_zero_low)  && (adc_key_in <= cutoff_zero_high))  { button_combinations|=(0x01<<BUTTON_DOWN_MASK);}
+ if ((adc_key_in >= cutoff_one_low)   && (adc_key_in <= cutoff_one_high))   { return COMMAND_CODE_FOR_STROBE_ROTATE; }
+ if ((adc_key_in >= cutoff_two_low)   && (adc_key_in <= cutoff_two_high))   { return COMMAND_CODE_FOR_EDID_3; }
+ if ((adc_key_in >= cutoff_three_low) && (adc_key_in <= cutoff_three_high)) { return COMMAND_CODE_FOR_EDID_2; }
+#else
 adc_key_in = analogRead(BUTTONBOARD_A_BUTTON); 
  if ((adc_key_in >= cutoff_zero_low)  && (adc_key_in <= cutoff_zero_high))  { button_combinations|=(0x01<<BUTTON_UP_MASK);}
  if ((adc_key_in >= cutoff_one_low)   && (adc_key_in <= cutoff_one_high))   { return COMMAND_CODE_FOR_EDID_2; }
  if ((adc_key_in >= cutoff_two_low)   && (adc_key_in <= cutoff_two_high))   { return COMMAND_CODE_FOR_EDID_1; }
  if ((adc_key_in >= cutoff_three_low) && (adc_key_in <= cutoff_three_high)) { return COMMAND_CODE_FOR_EDID_0; }
- 
 adc_key_in = analogRead(BUTTONBOARD_B_BUTTON);   
  if ((adc_key_in >= cutoff_zero_low)  && (adc_key_in <= cutoff_zero_high))  { button_combinations|=(0x01<<BUTTON_DOWN_MASK);}
  if ((adc_key_in >= cutoff_one_low)   && (adc_key_in <= cutoff_one_high))   { return COMMAND_CODE_FOR_STROBE_ROTATE; }
- 
- #if BUTTONBOARD_VERSION==BUTTONBOARD_IS_ZISWORKS_WITH_OLD_REV1_PIN_MAPPING
- if ((adc_key_in >= cutoff_two_low)   && (adc_key_in <= cutoff_two_high))   { return COMMAND_CODE_FOR_EDID_4; }
- #else
  if ((adc_key_in >= cutoff_two_low)   && (adc_key_in <= cutoff_two_high))   { return COMMAND_CODE_FOR_CROSSHAIR; }
- #endif
-  
  if ((adc_key_in >= cutoff_three_low) && (adc_key_in <= cutoff_three_high)) { return COMMAND_CODE_FOR_EDID_3; }
+#endif
  
 if(digitalRead(BUTTONBOARD_POWER_BUTTON)==LOW) {  button_combinations|=(0x01<<BUTTON_POWER_MASK);}
             
